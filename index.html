@@ -1,4 +1,4 @@
-???<!DOCTYPE html>
+﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -107,7 +107,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .tut-section h4.warn{color:#ffb74d}
 .tut-section ul{list-style:none;padding:0}
 .tut-section li{font-size:13px;color:rgba(255,255,255,0.7);padding:4px 0 4px 16px;position:relative}
-.tut-section li::before{content:'?';position:absolute;left:2px;color:rgba(255,255,255,0.3)}
+.tut-section li::before{content:'•';position:absolute;left:2px;color:rgba(255,255,255,0.3)}
 .tut-tips{font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6}
 .tut-actions{display:flex;gap:10px;margin-top:16px}
 .btn-done{flex:1;padding:12px;border:none;border-radius:12px;background:linear-gradient(135deg,#1565c0,#1976d2);color:#fff;font-size:14px;font-weight:700;cursor:pointer}
@@ -125,21 +125,21 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <meta name="theme-color" content="#0a1628">
 </head>
 <body>
-<div class="bg-ball">?</div>
-<div class="bg-ball">???</div>
-<div class="bg-ball">?</div>
-<div class="bg-ball">??</div>
+<div class="bg-ball">⚽</div>
+<div class="bg-ball">🏋️</div>
+<div class="bg-ball">⚽</div>
+<div class="bg-ball">💪</div>
 
 <div class="login-overlay" id="loginOverlay">
   <div class="login-card">
-    <h2>? 龙港新势力</h2>
+    <h2>⚽ 龙港新势力</h2>
     <div class="sub">足球训练打卡 · 云端同步</div>
     <div class="error" id="loginError"></div>
     <input type="text" id="loginEmail" placeholder="邮箱" autocomplete="email">
     <input type="password" id="loginPassword" placeholder="密码" autocomplete="current-password">
     <button class="btn-primary" id="loginBtn" type="button" onclick="login()" onclick="login()">登录</button>
     <div class="divider">输入昵称+密码，数据自动同步</div>
-    <button class="btn-ghost" onclick="skipLogin()">先看看 ??</button>
+    <button class="btn-ghost" onclick="skipLogin()">先看看 🌟</button>
   </div>
 </div>
 
@@ -155,9 +155,9 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     </div>
   </div>
   <div class="header-actions">
-    <button class="action-btn" onclick="exportData()">??? 导出</button>
-    <button class="action-btn" onclick="document.getElementById('importInput').click()">?? 导入</button>
-    <button class="action-btn" onclick="resetWeek()" style="color:#ff6b35">?? 重置本周</button>
+    <button class="action-btn" onclick="exportData()">🗑️ 导出</button>
+    <button class="action-btn" onclick="document.getElementById('importInput').click()">📌 导入</button>
+    <button class="action-btn" onclick="resetWeek()" style="color:#ff6b35">🔄 重置本周</button>
     <input type="file" id="importInput" accept=".json" style="display:none" onchange="importData(event)">
   </div>
   <div class="date-display" id="dateDisplay"></div>
@@ -175,7 +175,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   </div>
   <div class="glass">
     <div class="plan-header" id="planHeader">
-      <div><span class="card-type" id="planType">?? 上半身</span><span class="plan-title" id="planTitle" style="margin-left:8px">训练计划</span></div>
+      <div><span class="card-type" id="planType">💪 上半身</span><span class="plan-title" id="planTitle" style="margin-left:8px">训练计划</span></div>
       <div class="plan-dur" id="planDur"></div>
     </div>
     <div class="plan-note" id="planNote"></div>
@@ -188,18 +188,18 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <div class="tut-modal">
     <div class="tut-title" id="tutTitle">动作名称</div>
     <div class="tut-section">
-      <h4>? 正确步骤</h4>
+      <h4>✅ 正确步骤</h4>
       <ul id="tutSteps"></ul>
     </div>
     <div class="tut-section">
-      <h4 class="warn">?? 常见错误</h4>
+      <h4 class="warn">👍 常见错误</h4>
       <ul id="tutMistakes"></ul>
     </div>
     <div class="tut-section">
       <div class="tut-tips" id="tutTips"></div>
     </div>
     <div class="tut-actions">
-      <button class="btn-done" onclick="markDone()">? 已完成</button>
+      <button class="btn-done" onclick="markDone()">✅ 已完成</button>
       <button class="btn-close" onclick="closeTut()">关闭</button>
     </div>
   </div>
@@ -219,7 +219,7 @@ var _clickedEx = null;
 
 
 
-var EMOS = ["??","??","??","?","??","??","?","??"];
+var EMOS = ["🎉","🔥","💪","⭐","🌟","🏆","✨","😎"];
 var DAYS = ["日","一","二","三","四","五","六"];
 
 // ===== Supabase helpers (defined first, before login) =====
@@ -370,7 +370,7 @@ function render() {
   var now = new Date(), tk = todayKey();
   document.getElementById("dateDisplay").innerText = now.getFullYear() + "年" + (now.getMonth()+1) + "月" + now.getDate() + "日 周" + ["日","一","二","三","四","五","六"][now.getDay()] + " | " + ["周休","上身训练日","下身训练日","足球训练日","上身训练日","下身训练日","周休"][selDay];
 
-  var ph = "", pl = ["边后卫","中后卫","中场","前锋","守门员"], pi = ["???","??","??","?","??"];
+  var ph = "", pl = ["边后卫","中后卫","中场","前锋","守门员"], pi = ["🛡️","🧱","🎯","⚡","🧤"];
   for (var i = 0; i < pl.length; i++) {
     var ic = pi[i]; var ac = pl[i] === curPosKey ? "active" : "";
     ph += "<button class=\"pos-btn " + ac + "\" data-pos=\"" + pl[i] + "\">" + ic + " " + pl[i] + "</button>";
@@ -386,14 +386,14 @@ function render() {
     if (i === 0 || i === 6) cls += " rest";
     var tag = "", tc = "day-tag";
     if (i === 0 || i === 6) { tag = "休"; tc += " restday"; } else if (i === 1 || i === 4) { tag = "上身"; tc += " upper"; } else if (i === 2 || i === 5) { tag = "下身"; tc += " lower"; } else if (i === 3) { tag = "足球"; tc += " football"; }
-    var wd_=new Date(now);wd_.setDate(now.getDate()-now.getDay()+i);var wk_=wd_.getFullYear()+"-"+(wd_.getMonth()+1)+"-"+wd_.getDate();var done_=data[wk_]?"?":"";dh+="<div class=\""+cls+"\" onclick=\"selDayClick("+i+")\">"+DAYS[i]+"<span class=\""+tc+"\">"+tag+"</span><span class=\"day-date\">"+wd_.getDate()+" "+done_+"</span></div>";
+    var wd_=new Date(now);wd_.setDate(now.getDate()-now.getDay()+i);var wk_=wd_.getFullYear()+"-"+(wd_.getMonth()+1)+"-"+wd_.getDate();var done_=data[wk_]?"✅":"";dh+="<div class=\""+cls+"\" onclick=\"selDayClick("+i+")\">"+DAYS[i]+"<span class=\""+tc+"\">"+tag+"</span><span class=\"day-date\">"+wd_.getDate()+" "+done_+"</span></div>";
   }
   document.getElementById("dayBar").innerHTML = dh;
 
   document.getElementById("streakBadge").innerText = keys.length + "天";
   var streakCount = 0, sk = Object.keys(data).sort().reverse();
   for (var i = 0; i < sk.length; i++) { var cd = new Date(); cd.setDate(cd.getDate() - i); var ck = cd.getFullYear() + "-" + (cd.getMonth() + 1) + "-" + cd.getDate(); if (data[ck]) streakCount++; else break; }
-  document.getElementById("statsRow").innerHTML = "<div class=\"stat-item\"><div class=\"stat-icon\">??</div><div class=\"stat-num\">" + streakCount + "</div><div class=\"stat-label\">连续打卡</div></div><div class=\"stat-item\"><div class=\"stat-icon\">??</div><div class=\"stat-num\">" + keys.length + "</div><div class=\"stat-label\">总天数</div></div><div class=\"stat-item\"><div class=\"stat-icon\">?</div><div class=\"stat-num\">" + now.getDate() + "</div><div class=\"stat-label\">" + ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][now.getMonth()] + "</div></div>";
+  document.getElementById("statsRow").innerHTML = "<div class=\"stat-item\"><div class=\"stat-icon\">🔥</div><div class=\"stat-num\">" + streakCount + "</div><div class=\"stat-label\">连续打卡</div></div><div class=\"stat-item\"><div class=\"stat-icon\">📅</div><div class=\"stat-num\">" + keys.length + "</div><div class=\"stat-label\">总天数</div></div><div class=\"stat-item\"><div class=\"stat-icon\">⭐</div><div class=\"stat-num\">" + now.getDate() + "</div><div class=\"stat-label\">" + ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][now.getMonth()] + "</div></div>";
 
   
 
@@ -408,7 +408,7 @@ function render() {
     pheader.className = "plan-header rest-bg"; ptype.className = "card-type";
     ptype.innerText = "休息日"; title.innerText = ""; dur.innerText = "";
     note.innerText = "好好休息，恢复体能";
-    list.innerHTML = "<div class=\"empty-state\"><div class=\"big\">???</div><div class=\"txt\">今天休息，让身体充分恢复</div></div>";
+    list.innerHTML = "<div class=\"empty-state\"><div class=\"big\">🛋️</div><div class=\"txt\">今天休息，让身体充分恢复</div></div>";
     if (selDay === now.getDay() && !data[tk]) { btn.className = "checkin-btn rest"; btn.innerText = "完成休息"; btn.style.display = "block"; } else { btn.style.display = "none"; }
     return;
   }
@@ -424,7 +424,7 @@ function render() {
   var tk2 = td.getFullYear() + "-" + (td.getMonth() + 1) + "-" + td.getDate();
   var checked = !!data[tk2];
 
-  if (checked) { list.innerHTML = plan.e.map(function(ex, i) { return "<div class=\"exercise done\"><div class=\"check-circle\">?</div><div class=\"ex-info\"><div class=\"ex-name\">" + ex[0] + "</div><div class=\"ex-detail\">" + ex[1] + "</div></div></div>"; }).join(""); btn.style.display = "none"; return; }
+  if (checked) { list.innerHTML = plan.e.map(function(ex, i) { return "<div class=\"exercise done\"><div class=\"check-circle\">✅</div><div class=\"ex-info\"><div class=\"ex-name\">" + ex[0] + "</div><div class=\"ex-detail\">" + ex[1] + "</div></div></div>"; }).join(""); btn.style.display = "none"; return; }
   list.innerHTML = plan.e.map(function(ex, i) { return "<div class=\"exercise\" data-idx=\"" + i + "\" data-name=\"" + ex[0] + "\" data-detail=\"" + ex[1] + "\"><div class=\"check-circle\" id=\"chk" + i + "\"></div><div class=\"ex-info\"><div class=\"ex-name\">" + ex[0] + "</div><div class=\"ex-detail\">" + ex[1] + "</div></div><div class=\"ex-num\">" + (i + 1) + "</div></div>"; }).join("");
   btn.style.display = "block"; btn.className = "checkin-btn"; btn.innerText = "完成今日打卡";
 }
@@ -460,7 +460,7 @@ document.getElementById("exerciseList").addEventListener("click", function(e) {
   _clickedEx = item; o.classList.add("show");
 });
 
-function markDone() { if (_clickedEx) { _clickedEx.classList.add("done"); var ck = _clickedEx.querySelector(".check-circle"); if (ck) ck.innerText = "?"; showEmoji("?"); } closeTut(); }
+function markDone() { if (_clickedEx) { _clickedEx.classList.add("done"); var ck = _clickedEx.querySelector(".check-circle"); if (ck) ck.innerText = "✅"; showEmoji("✅"); } closeTut(); }
 function closeTut() { document.getElementById("tutOverlay").classList.remove("show"); _clickedEx = null; }
 
 window.onload = function() {
@@ -488,7 +488,7 @@ var PLANS = {"边后卫":{"1":{"t":"周一 · 上半身力量","d":"60min","n":"
 
 var TIPS = {"卧推":{s:["肩胛骨收紧贴凳","杠铃下放至胸中线","推起时呼气锁定"],m:["肩膀前送","杠铃落点太低"],t:"从空杠开始热身，递增重量。"},"深蹲":{s:["杠铃位置在斜方肌上","下蹲时膝盖对准脚尖","大腿平行地面"],m:["膝盖内扣","身体过度前倾"],t:"从50%重量热身，逐组递增。"},"硬拉":{s:["杠铃贴近小腿","背部挺直核心收紧","髋部发力前推"],m:["圆背拉起","杠铃远离身体"],t:"硬拉不做力竭组。"},"引体向上":{s:["正握肩宽","拉至下巴过杠","缓慢下放控制"],m:["身体晃动借力","下放太快"],t:"用弹力带辅助。"},"射门":{s:["支撑脚指向目标","脚背绷直摆腿","随球动作完整"],m:["身体后仰打高","支撑脚太远"],t:"先练定点，再练跑动中射门。"},"扑救":{s:["快速横移面对球","蹬地发力侧扑","手型呈W型"],m:["眼睛闭起来","手型松散"],t:"集中注意力预判。"}};
 
-var EMOS = ["??","??","??","?","??","??","?","??"];
+var EMOS = ["🎉","🔥","💪","⭐","🌟","🏆","✨","😎"];
 var DAYS = ["日","一","二","三","四","五","六"];
 var selDay = new Date().getDay();
 var curPosKey = localStorage.getItem("posKey") || "边后卫";
@@ -524,7 +524,7 @@ function showEmoji(x){var l=x?[x].concat(EMOS):EMOS;for(var i=0;i<5;i++){var e=d
 async function doCheckin(){var n=new Date(),k=todayKey(),d=getData();d[k]={date:k,day:n.getDay(),at:new Date().toISOString()};saveData(d);if(_currentUser)saveCloudData(d);showEmoji();render()}
 document.getElementById("posBar").addEventListener("click",function(e){var b=e.target.closest(".pos-btn");if(b&&b.dataset.pos){selPos(b.dataset.pos)}})
 document.getElementById("exerciseList").addEventListener("click",function(e){var i=e.target.closest(".exercise");if(!i||i.classList.contains("done"))return;var n=i.getAttribute("data-name")||"",t=getTip(n),o=document.getElementById("tutOverlay");document.getElementById("tutTitle").innerText=n;if(t){document.getElementById("tutSteps").innerHTML=t.s.map(function(s){return"<li>"+s+"</li>"}).join("");document.getElementById("tutMistakes").innerHTML=t.m.map(function(m){return"<li>"+m+"</li>"}).join("");document.getElementById("tutTips").innerText=t.t}else{document.getElementById("tutSteps").innerHTML="<li>保持正确姿势</li>";document.getElementById("tutMistakes").innerHTML="<li>不要借用惯性</li>";document.getElementById("tutTips").innerText="质量优先于数量。"}_clickedEx=i;o.classList.add("show")})
-function markDone(){if(_clickedEx){_clickedEx.classList.add("done");var c=_clickedEx.querySelector(".check-circle");if(c)c.innerText="?";showEmoji("?")}closeTut()}
+function markDone(){if(_clickedEx){_clickedEx.classList.add("done");var c=_clickedEx.querySelector(".check-circle");if(c)c.innerText="✓";showEmoji("✅")}closeTut()}
 function closeTut(){document.getElementById("tutOverlay").classList.remove("show");_clickedEx=null}
 window.onload=function(){var s=localStorage.getItem("sb_user");if(s){try{_currentUser=JSON.parse(s)}catch(e){}}}
 
