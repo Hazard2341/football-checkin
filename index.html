@@ -131,7 +131,7 @@ function getSupabase() {
 }
 
 // Replace supabase auth with direct REST API
-async function supabaseSignIn(email, password) {
+async async function supabaseSignIn(email, password) {
   var sb = getSupabase();
   if (!sb) return {error: {message: "No Supabase config"}};
   try {
@@ -227,7 +227,7 @@ function saveData(d) {
   if(_currentUser) saveCloudData(d);
 }
 
-async function login() {
+async async function login() {
   var email=document.getElementById('loginEmail').value.trim();
   var pw=document.getElementById('loginPassword').value.trim();
   var errEl=document.getElementById('loginError');
