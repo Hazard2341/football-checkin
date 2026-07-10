@@ -123,6 +123,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 }</style>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0a1628">
+<script charset="utf-8" src="https://map.qq.com/api/gljs?v=1.exp&key=KANBZ-A2FCI-ZLUG4-U73J2-EFP3E-7XBKO"></script>
 </head>
 <body>
 <div class="bg-ball">⚽</div>
@@ -652,7 +653,7 @@ window.onload=function(){var s=localStorage.getItem("sb_user");if(s){try{_curren
 .modal-close{width:100%;padding:10px;border:none;border-radius:12px;background:linear-gradient(135deg,#1565c0,#1976d2);color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-top:16px}
 
 /* ===== 球场 ===== */
-.field-loc-bar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:rgba(255,255,255,0.03)}
+.field-loc-bar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:rgba(255,255,255,0.03)}.field-search-bar{padding:0 16px 10px}.field-search-bar input{width:100%;padding:10px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:#fff;font-size:13px;outline:none;box-sizing:border-box}.field-search-bar input::placeholder{color:rgba(255,255,255,0.3)}
 #locText{flex:1;font-size:13px;color:rgba(255,255,255,0.6)}
 .loc-btn{padding:6px 16px;border:none;border-radius:20px;background:linear-gradient(135deg,#1565c0,#1976d2);color:#fff;font-size:12px;cursor:pointer}
 .field-list{padding:0 16px}
@@ -788,43 +789,112 @@ function showExDetail(idx) {
 
 function closeExModal() { document.getElementById('exModal').classList.remove('show'); }
 
-// ===== 球场数据 =====
-var FIELDS_DATA = [
-  {name:"成华足球公园",addr:"成都市成华区建设北路三段",dist:"约1.2km",price:"¥80/小时",phone:"13800138001",lat:30.665,lng:104.105,tags:["五人制","七人制","灯光"]},
-  {name:"东郊记忆足球场",addr:"成都市成华区东郊记忆内",dist:"约2.5km",price:"¥100/小时",phone:"13800138002",lat:30.67,lng:104.115,tags:["十一人制","草皮好","停车方便"]},
-  {name:"电子科大沙河校区",addr:"成都市成华区建设北路二段",dist:"约0.8km",price:"¥60/小时",phone:"13800138003",lat:30.66,lng:104.098,tags:["五人制","便宜","校园"]},
-  {name:"成华区体育中心",addr:"成都市成华区双林路",dist:"约3km",price:"¥120/小时",phone:"13800138004",lat:30.655,lng:104.092,tags:["十一人制","标准场","淋浴"]},
-  {name:"新华公园足球场",addr:"成都市成华区双林路87号",dist:"约2.8km",price:"¥70/小时",phone:"13800138005",lat:30.657,lng:104.095,tags:["五人制","七人制"]}
-];
+// ===== 球场 - 腾讯地图 API =====
+var map = null;
+var searchService = null;
+var markers = [];
+var currentLat = 0;
+var currentLng = 0;
+var cityTimer = null;
 
 function renderFields() {
-  var html = '';
-  for (var i = 0; i < FIELDS_DATA.length; i++) {
-    var f = FIELDS_DATA[i];
-    var tagsHtml = '';
-    for (var j = 0; j < f.tags.length; j++) tagsHtml += '<span class="field-tag">' + f.tags[j] + '</span>';
-    html += '<div class="field-card">' +
-      '<div class="field-top"><span class="field-name">' + f.name + '</span><span class="field-dist">' + f.dist + '</span></div>' +
-      '<span class="field-addr">' + f.addr + '</span>' +
-      '<div class="field-tags">' + tagsHtml + '</div>' +
-      '<div class="field-bottom"><span class="field-price">' + f.price + '</span>' +
-      '<div class="field-actions"><button class="field-btn field-btn-call" onclick="callField(\'' + f.phone + '\')">📞 联系</button>' +
-      '<button class="field-btn field-btn-nav" onclick="navField(' + f.lat + ',' + f.lng + ')">🗺️ 导航</button></div></div></div>';
-  }
-  document.getElementById('fieldList').innerHTML = html;
-  document.getElementById('locText').textContent = '📍 成都成华区（模拟数据）';
+  document.getElementById('fieldList').innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3)">📍 点击"搜索附近"查找附近的球场</div>';
+  document.getElementById('locText').textContent = '📍 等待定位...';
 }
 
-function getLocation() {
+function searchNearby() {
+  document.getElementById('fieldList').innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3)">⏳ 正在定位...</div>';
+  
+  // 先尝试获取位置
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function(pos) {
-      document.getElementById('locText').textContent = '📍 ' + pos.coords.latitude.toFixed(4) + ', ' + pos.coords.longitude.toFixed(4);
+      currentLat = pos.coords.latitude;
+      currentLng = pos.coords.longitude;
+      document.getElementById('locText').textContent = '📍 当前位置：' + currentLat.toFixed(4) + ', ' + currentLng.toFixed(4);
+      doSearch(currentLat, currentLng, '');  // 改用空字符串
     }, function() {
-      document.getElementById('locText').textContent = '📍 定位失败，显示模拟数据';
-    });
+      // 定位失败，用 IP 定位
+      ipLocate();
+    }, { enableHighAccuracy: true, timeout: 8000 });
   } else {
-    document.getElementById('locText').textContent = '📍 浏览器不支持定位，显示模拟数据';
+    ipLocate();
   }
+}
+
+function ipLocate() {
+  document.getElementById('locText').textContent = '📍 正在通过IP定位...';
+  // 用腾讯地图 IP 定位
+  var script = document.createElement('script');
+  script.src = 'https://apis.map.qq.com/ws/location/v1/ip?key=KANBZ-A2FCI-ZLUG4-U73J2-EFP3E-7XBKO&output=jsonp&callback=onIPLocate';
+  document.head.appendChild(script);
+}
+
+function onIPLocate(res) {
+  if (res && res.result && res.result.location) {
+    currentLat = res.result.location.lat;
+    currentLng = res.result.location.lng;
+    document.getElementById('locText').textContent = '📍 ' + (res.result.ad_info ? res.result.ad_info.city : '当前位置');
+    doSearch(currentLat, currentLng, '');
+  } else {
+    // 默认成都
+    currentLat = 30.57;
+    currentLng = 104.07;
+    document.getElementById('locText').textContent = '📍 定位失败，默认显示成都';
+    doSearch(currentLat, currentLng, '');
+  }
+}
+
+function doSearch(lat, lng, keyword) {
+  document.getElementById('fieldList').innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3)">⏳ 正在搜索附近球场...</div>';
+  
+  var url = 'https://apis.map.qq.com/ws/place/v1/search?boundary=nearby(' + lat + ',' + lng + ',3000)&keyword=' + encodeURIComponent(keyword || '足球场|球场|足球') + '&key=KANBZ-A2FCI-ZLUG4-U73J2-EFP3E-7XBKO&output=jsonp&callback=onSearchResult';
+  
+  var script = document.createElement('script');
+  script.src = url;
+  document.head.appendChild(script);
+}
+
+function onSearchResult(res) {
+  if (!res || res.status !== 0 || !res.data || res.data.length === 0) {
+    document.getElementById('fieldList').innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3)">附近没有找到球场，试试扩大搜索范围</div>';
+    return;
+  }
+  
+  var data = res.data;
+  var html = '';
+  for (var i = 0; i < data.length; i++) {
+    var f = data[i];
+    var dist = f._distance ? (f._distance < 1000 ? Math.round(f._distance) + 'm' : (f._distance/1000).toFixed(1) + 'km') : '未知距离';
+    var tags = '';
+    if (f.category) {
+      var cats = f.category.split(';');
+      for (var j = 0; j < cats.length; j++) tags += '<span class="field-tag">' + cats[j] + '</span>';
+    }
+    if (!tags) tags = '<span class="field-tag">⚽ 球场</span>';
+    
+    html += '<div class="field-card">' +
+      '<div class="field-top"><span class="field-name">' + f.title + '</span><span class="field-dist">' + dist + '</span></div>' +
+      '<span class="field-addr">' + (f.address || '暂无地址') + '</span>' +
+      '<div class="field-tags">' + tags + '</div>' +
+      '<div class="field-bottom">' +
+      '<div class="field-actions"><button class="field-btn field-btn-nav" onclick="navField(' + f.location.lat + ',' + f.location.lng + ')">🗺️ 导航</button></div></div></div>';
+  }
+  if (!html) html = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3)">附近没有找到球场</div>';
+  document.getElementById('fieldList').innerHTML = html;
+}
+
+function citySearch(val) {
+  if (cityTimer) clearTimeout(cityTimer);
+  if (!val || val.length < 2) return;
+  cityTimer = setTimeout(function() {
+    document.getElementById('locText').textContent = '📍 搜索：' + val;
+    document.getElementById('fieldList').innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3)">⏳ 正在搜索...</div>';
+    
+    var url = 'https://apis.map.qq.com/ws/place/v1/search?boundary=region(' + encodeURIComponent(val) + ',0)&keyword=' + encodeURIComponent('足球场') + '&key=KANBZ-A2FCI-ZLUG4-U73J2-EFP3E-7XBKO&output=jsonp&callback=onSearchResult';
+    var script = document.createElement('script');
+    script.src = url;
+    document.head.appendChild(script);
+  }, 500);
 }
 
 function callField(phone) { window.location.href = 'tel:' + phone; }
@@ -881,6 +951,7 @@ function doLogout() {
 
 </body>
 </html>
+
 
 
 
