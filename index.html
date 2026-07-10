@@ -1,129 +1,124 @@
-﻿﻿﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>龙港新势力 · 足球训练打卡</title>
-
 <style>
-/* Login page */
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  min-height:100vh;padding-bottom:30px;position:relative;overflow-x:hidden;
+  background:linear-gradient(135deg,#0a1628,#1a2a4a,#0d1f3c);
+  color:#fff
+}
+body::before{content:'';position:fixed;inset:0;z-index:-2;background:radial-gradient(ellipse at 50% 0%, #1b4a2e 0%, #0d1f3c 60%, #0a1628 100%)}
+body::after{content:'';position:fixed;inset:0;z-index:-1;background:repeating-linear-gradient(90deg,transparent,transparent 50px,rgba(255,255,255,0.03) 50px,rgba(255,255,255,0.03) 51px),repeating-linear-gradient(0deg,transparent,transparent 50px,rgba(255,255,255,0.02) 50px,rgba(255,255,255,0.02) 51px)}
+.bg-ball{position:fixed;z-index:-1;pointer-events:none;user-select:none;opacity:0.08}
+.bg-ball:nth-child(1){top:5%;left:3%;font-size:90px;animation:bgFloat 18s ease-in-out infinite}
+.bg-ball:nth-child(2){top:40%;right:5%;font-size:60px;animation:bgFloat 22s ease-in-out infinite -6s}
+.bg-ball:nth-child(3){bottom:15%;left:10%;font-size:75px;animation:bgFloat 20s ease-in-out infinite -12s}
+.bg-ball:nth-child(4){bottom:5%;right:8%;font-size:50px;animation:bgFloat 16s ease-in-out infinite -4s}
+@keyframes bgFloat{0%,100%{transform:translateY(0) rotate(0deg)}33%{transform:translateY(-20px) rotate(12deg)}66%{transform:translateY(12px) rotate(-6deg)}}
+.header{background:linear-gradient(135deg,#1a237ee6,#0d1453e6);backdrop-filter:blur(12px);padding:18px 16px 10px;position:sticky;top:0;z-index:100;border-bottom:2px solid rgba(255,255,255,0.08)}
+.header-top{display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:20px;font-weight:800;background:linear-gradient(90deg,#fff,#90caf9);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.streak{background:linear-gradient(135deg,#ff6b35,#ff8f65);padding:4px 14px;border-radius:20px;font-size:13px;font-weight:700;box-shadow:0 2px 8px rgba(255,107,53,0.3)}
+.date-display{font-size:13px;opacity:0.7;margin-top:4px}
+.header-actions{display:flex;gap:6px;margin-top:6px}
+.action-btn{padding:4px 12px;border-radius:14px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.8);cursor:pointer;font-size:12px;font-weight:600;transition:all 0.15s}
+.action-btn:active{transform:scale(0.95)}
+.user-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.08);padding:3px 12px 3px 8px;border-radius:20px;font-size:12px;cursor:pointer}
+.user-avatar{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#1565c0,#1976d2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.pos-bar{display:flex;gap:6px;padding:8px 12px;overflow-x:auto;background:rgba(255,255,255,0.06);-webkit-overflow-scrolling:touch;justify-content:center;border-bottom:1px solid rgba(255,255,255,0.05)}
+.pos-btn{flex-shrink:0;padding:6px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,0.15);background:transparent;color:rgba(255,255,255,0.75);cursor:pointer;font-size:13px;font-weight:600;transition:all 0.2s;white-space:nowrap}
+.pos-btn.active{background:linear-gradient(135deg,#1565c0,#1976d2);color:#fff;border-color:transparent;box-shadow:0 2px 8px rgba(21,101,192,0.4)}
+.day-bar{display:flex;gap:5px;padding:12px 14px;overflow-x:auto;background:linear-gradient(180deg,rgba(26,35,126,0.4),rgba(40,53,147,0.2));-webkit-overflow-scrolling:touch}
+.day-btn{flex:1;min-width:44px;padding:10px 3px;border-radius:10px;border:2px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.6);cursor:pointer;text-align:center;font-size:15px;font-weight:700;transition:all 0.2s}
+.day-btn.active{background:#fff;color:#1a237e;border-color:#fff;box-shadow:0 2px 12px rgba(255,255,255,0.2)}
+.day-btn.today{border-color:#ff6b35;background:rgba(255,107,53,0.18);color:#ff6b35;font-size:17px;box-shadow:0 0 12px rgba(255,107,53,0.15)}
+.day-btn.checked{color:#4ade80;border-color:#4ade80;background:rgba(74,222,128,0.12)}
+.day-btn.rest{color:rgba(255,255,255,0.3);border-color:rgba(255,255,255,0.05);cursor:default}
+.day-tag{font-size:9px;display:block;margin-top:2px;opacity:0.6;font-weight:400}
+.day-tag.upper{color:#f59e0b}
+.day-tag.lower{color:#3b82f6}
+.day-tag.football{color:#4ade80}
+.day-tag.restday{color:rgba(255,255,255,0.3)}
+.container{max-width:480px;margin:0 auto;padding:10px 12px}
+.glass{background:rgba(255,255,255,0.07);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:16px;border:1px solid rgba(255,255,255,0.08);margin-bottom:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.2)}
+.card-type{display:inline-block;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:700}
+.card-type.upper{background:rgba(245,158,11,0.2);color:#f59e0b}
+.card-type.lower{background:rgba(59,130,246,0.2);color:#3b82f6}
+.card-type.football{background:rgba(74,222,128,0.2);color:#4ade80}
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-item{background:rgba(255,255,255,0.07);backdrop-filter:blur(12px);border-radius:14px;padding:14px 8px;text-align:center;border:1px solid rgba(255,255,255,0.05)}
+.stat-num{font-size:26px;font-weight:800;background:linear-gradient(135deg,#fff,#90caf9);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px}
+.stat-icon{font-size:18px;margin-bottom:4px}
+.weekly-progress{padding:14px 16px}
+.weekly-progress h3{font-size:14px;font-weight:600;margin-bottom:8px;display:flex;justify-content:space-between}
+.weekly-progress h3 span{color:rgba(255,255,255,0.5);font-weight:400}
+.pbar{height:8px;background:rgba(255,255,255,0.1);border-radius:8px;overflow:hidden}
+.pfill{height:100%;background:linear-gradient(90deg,#4ade80,#22d3ee);border-radius:8px;transition:width 0.6s ease}
+.plan-header{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.06)}
+.plan-header.upper-bg{background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(245,158,11,0.05))}
+.plan-header.lower-bg{background:linear-gradient(135deg,rgba(59,130,246,0.2),rgba(59,130,246,0.05))}
+.plan-header.football-bg{background:linear-gradient(135deg,rgba(74,222,128,0.2),rgba(74,222,128,0.05))}
+.plan-header.rest-bg{background:linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))}
+.plan-title{font-size:16px;font-weight:700}
+.plan-dur{font-size:12px;background:rgba(255,255,255,0.08);padding:3px 10px;border-radius:12px;color:rgba(255,255,255,0.7)}
+.plan-note{padding:8px 16px;font-size:12px;color:rgba(255,255,255,0.5);background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.04);line-height:1.5}
+.exercise{padding:12px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:background 0.15s;border-bottom:1px solid rgba(255,255,255,0.04)}
+.exercise:active{background:rgba(255,255,255,0.06)}
+.exercise.done{opacity:0.4}
+.exercise.done .ex-name{text-decoration:line-through;color:rgba(255,255,255,0.3)}
+.check-circle{width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;transition:all 0.3s;color:transparent}
+.exercise.done .check-circle{background:linear-gradient(135deg,#4ade80,#22d3ee);border-color:transparent;color:#fff;font-size:14px}
+.ex-info{flex:1;min-width:0}
+.ex-name{font-weight:600;font-size:14px}
+.ex-detail{font-size:12px;color:rgba(255,255,255,0.45);margin-top:2px}
+.ex-num{font-weight:700;font-size:14px;color:rgba(100,180,255,0.5);background:rgba(100,180,255,0.08);padding:4px 10px;border-radius:8px;flex-shrink:0}
+.checkin-btn{display:block;width:calc(100% - 32px);margin:16px auto;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,#ff6b35,#ff8f65);color:#fff;font-size:17px;font-weight:800;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 20px rgba(255,107,53,0.3)}
+.checkin-btn:active{transform:scale(0.97)}
+.checkin-btn.rest{background:linear-gradient(135deg,#4ade80,#22d3ee);box-shadow:0 4px 20px rgba(74,222,128,0.3)}
 .login-overlay{position:fixed;inset:0;z-index:500;background:linear-gradient(135deg,#0a1628,#1a2a4a);display:flex;align-items:center;justify-content:center;padding:20px}
 .login-card{background:rgba(255,255,255,0.08);backdrop-filter:blur(20px);border-radius:24px;border:1px solid rgba(255,255,255,0.1);padding:32px 28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.4)}
 .login-card h2{text-align:center;font-size:22px;font-weight:800;margin-bottom:4px;background:linear-gradient(90deg,#fff,#90caf9);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .login-card .sub{text-align:center;font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:24px}
-.login-card input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:#fff;font-size:15px;outline:none;transition:border 0.2s;margin-bottom:12px}
+.login-card input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:#fff;font-size:15px;outline:none;margin-bottom:12px}
 .login-card input:focus{border-color:#1565c0}
-.login-card input::placeholder{color:rgba(255,255,255,0.3)}
-.login-card .btn-primary{width:100%;padding:12px;border:none;border-radius:12px;background:linear-gradient(135deg,#1565c0,#1976d2);color:#fff;font-size:16px;font-weight:700;cursor:pointer;transition:all 0.15s;margin-top:4px}
-.login-card .btn-primary:active{transform:scale(0.97)}
+.login-card .btn-primary{width:100%;padding:12px;border:none;border-radius:12px;background:linear-gradient(135deg,#1565c0,#1976d2);color:#fff;font-size:16px;font-weight:700;cursor:pointer;margin-top:4px}
 .login-card .btn-ghost{width:100%;padding:10px;border:none;border-radius:12px;background:transparent;color:rgba(255,255,255,0.6);font-size:13px;cursor:pointer;margin-top:8px}
-.login-card .btn-ghost:hover{color:rgba(255,255,255,0.9)}
 .login-card .error{font-size:13px;color:#ff6b35;margin-bottom:10px;display:none}
 .login-card .divider{text-align:center;font-size:12px;color:rgba(255,255,255,0.3);margin:16px 0}
-.user-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.08);padding:3px 12px 3px 8px;border-radius:20px;font-size:12px;cursor:pointer;transition:all 0.15s}
-.user-badge:active{background:rgba(255,255,255,0.15)}
-.user-avatar{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#1565c0,#1976d2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);display:none;align-items:flex-end;justify-content:center;padding:20px}
+.overlay.show{display:flex}
+.tut-modal{background:rgba(30,40,70,0.95);backdrop-filter:blur(20px);border-radius:20px;width:100%;max-width:440px;max-height:80vh;overflow-y:auto;padding:20px;border:1px solid rgba(255,255,255,0.08);animation:slideUp 0.3s ease}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.tut-title{font-size:18px;font-weight:700;margin-bottom:12px}
+.tut-section h4{font-size:14px;font-weight:600;margin-bottom:6px;color:#4ade80}
+.tut-section h4.warn{color:#ff6b35}
+.tut-section ul{padding-left:18px;font-size:13px;color:rgba(255,255,255,0.8);line-height:1.8}
+.tut-tips{font-size:13px;color:rgba(255,255,255,0.6);background:rgba(255,255,255,0.05);padding:10px 14px;border-radius:10px}
+.tut-actions{display:flex;gap:10px;margin-top:16px}
+.tut-actions button{flex:1;padding:12px;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer}
+.tut-actions .btn-done{background:linear-gradient(135deg,#4ade80,#22d3ee);color:#0a1628}
+.tut-actions .btn-close{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7)}
+@keyframes pop{0%{transform:scale(0) rotate(-15deg);opacity:0}50%{transform:scale(1.3) rotate(8deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-100px) scale(1.6)}}
+.floating-emoji{position:fixed;font-size:60px;z-index:300;pointer-events:none;animation:pop 0.35s ease forwards,floatUp 1s ease 0.35s forwards}
+.week-grid{display:flex;gap:4px;margin-top:8px}
+.wday{flex:1;text-align:center;padding:5px 2px;border-radius:6px;background:rgba(255,255,255,0.05);font-size:11px;color:rgba(255,255,255,0.4)}
+.wday.done{background:rgba(74,222,128,0.15);color:#4ade80;font-weight:600}
+.wday.t{color:rgba(255,255,255,0.6)}
+.empty-state{padding:30px 16px;text-align:center}
+.empty-state .big{font-size:40px;margin-bottom:8px}
+.empty-state .txt{font-size:14px;color:rgba(255,255,255,0.4)}
 .notification{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:400;background:rgba(30,40,70,0.95);backdrop-filter:blur(12px);padding:12px 24px;border-radius:14px;border:1px solid rgba(255,255,255,0.1);font-size:14px;font-weight:600;color:#4ade80;animation:notifIn 0.3s ease;pointer-events:none}
 @keyframes notifIn{from{transform:translateX(-50%) translateY(20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
-
-/* ===== Main App Styles (Dark Theme) ===== */
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a1628;color:#e0e0e0;font-family:-apple-system,'Segoe UI',sans-serif;min-height:100vh;overflow-x:hidden;padding-bottom:40px}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(21,101,192,0.08),transparent 70%),radial-gradient(ellipse at 80% 50%,rgba(25,118,210,0.05),transparent 70%);pointer-events:none;z-index:0}
-.bg-ball{position:fixed;font-size:80px;opacity:0.03;pointer-events:none;z-index:0;animation:float 12s ease-in-out infinite}
-.bg-ball:nth-child(1){top:10%;left:5%;font-size:60px;animation-delay:0s}
-.bg-ball:nth-child(2){top:30%;right:10%;font-size:100px;animation-delay:3s}
-.bg-ball:nth-child(3){bottom:20%;left:15%;font-size:70px;animation-delay:6s}
-.bg-ball:nth-child(4){bottom:40%;right:5%;font-size:50px;animation-delay:9s}
-@keyframes float{0%,100%{transform:translateY(0) rotate(0deg)}33%{transform:translateY(-20px) rotate(5deg)}66%{transform:translateY(10px) rotate(-3deg)}}
-
-.header{position:sticky;top:0;z-index:100;background:rgba(10,22,40,0.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.06);padding:12px 16px 8px}
-.header-top{display:flex;justify-content:center;align-items:center;margin-bottom:6px;position:relative}.header-top h1{font-size:24px;font-weight:900;text-align:center;letter-spacing:2px}.header-top .header-right{position:absolute;right:0;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:8px}
-.header-top h1{font-size:18px;font-weight:800;background:linear-gradient(90deg,#fff,#90caf9);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.header-actions{display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap}
-.action-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);padding:5px 12px;border-radius:10px;font-size:12px;cursor:pointer;transition:all 0.15s}
-.action-btn:active{background:rgba(255,255,255,0.12);transform:scale(0.95)}
-.streak{background:linear-gradient(135deg,#e65100,#ff6d00);color:#fff;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:700}
-.date-display{font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:4px}
-
-.pos-bar{position:sticky;top:88px;z-index:99;display:flex;gap:6px;padding:8px 16px;background:rgba(10,22,40,0.85);backdrop-filter:blur(12px);overflow-x:auto;-webkit-overflow-scrolling:touch;border-bottom:1px solid rgba(255,255,255,0.04)}
-.pos-bar::-webkit-scrollbar{height:0}
-.pos-btn{flex-shrink:0;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);padding:7px 14px;border-radius:14px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;white-space:nowrap}
-.pos-btn.active{background:linear-gradient(135deg,#1565c0,#1976d2);border-color:transparent;color:#fff;box-shadow:0 2px 12px rgba(21,101,192,0.3)}
-.pos-btn:active{transform:scale(0.95)}
-
-.day-bar{position:sticky;top:132px;z-index:98;display:flex;gap:4px;padding:8px 16px;background:rgba(10,22,40,0.85);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.04)}
-.day-btn{flex:1;text-align:center;padding:6px 2px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.5)}
-.day-btn.today{background:rgba(21,101,192,0.2);color:#90caf9;border:1px solid rgba(21,101,192,0.3)}
-.day-btn.active{background:rgba(25,118,210,0.15);color:#fff}
-.day-btn.rest{opacity:0.4}
-.day-tag{display:block;font-size:9px;margin-top:2px;border-radius:6px;padding:1px 0;font-weight:400}
-.day-tag.restday{color:#546e7a}
-.day-tag.upper{color:#4fc3f7}
-.day-tag.lower{color:#81c784}
-.day-tag.football{color:#ffb74d}
-
-.container{position:relative;z-index:1;max-width:600px;margin:0 auto;padding:12px 16px}
-.stats-row{display:flex;gap:8px;margin-bottom:12px}
-.stat-item{flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:12px 8px;text-align:center}
-.stat-icon{font-size:20px;margin-bottom:4px}
-.stat-num{font-size:22px;font-weight:800;color:#fff}
-.stat-label{font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px}
-
-.glass{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:16px;margin-bottom:12px;backdrop-filter:blur(8px)}
-.glass h3{font-size:14px;font-weight:700;color:rgba(255,255,255,0.6);margin-bottom:8px}
-.weekly-progress{margin-bottom:12px}
-.weekly-progress h3{font-size:14px;margin-bottom:8px}
-.pbar{height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden}
-.pfill{height:100%;border-radius:3px;background:linear-gradient(90deg,#4caf50,#8bc34a);transition:width 0.3s}
-
-.plan-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.card-type{font-size:13px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(255,255,255,0.06);color:#90caf9}
-.plan-title{font-size:15px;font-weight:700;color:#fff}
-.plan-dur{font-size:12px;color:rgba(255,255,255,0.4)}
-.plan-note{font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:10px;font-style:italic}
-
-.exercise{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:12px;margin-bottom:6px;cursor:pointer;transition:all 0.15s}
-.exercise:active{background:rgba(255,255,255,0.07);transform:scale(0.98)}
-.exercise.done{opacity:0.4;border-color:rgba(76,175,80,0.3)}
-.exercise .emoji{font-size:20px;flex-shrink:0}
-.exercise .ex-info{flex:1}
-.exercise .ex-name{font-size:14px;font-weight:600;color:#fff}
-.exercise .ex-detail{font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px}
-.exercise .ex-num{font-size:11px;color:rgba(255,255,255,0.3);font-weight:600}
-.check-circle{width:20px;height:20px;border-radius:50%;border:2px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;transition:all 0.15s}
-.exercise.done .check-circle{border-color:#4caf50;background:#4caf50;color:#fff}
-
-.checkin-btn{width:100%;padding:14px;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;transition:all 0.15s;margin-top:12px;background:linear-gradient(135deg,#1565c0,#1976d2);color:#fff;box-shadow:0 4px 16px rgba(21,101,192,0.25)}
-.checkin-btn:active{transform:scale(0.97)}
-.checkin-btn.hidden{display:none}
-
-.overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:20px}
-.overlay.show{display:flex}
-.tut-modal{background:rgba(20,32,58,0.97);backdrop-filter:blur(20px);border-radius:20px;border:1px solid rgba(255,255,255,0.08);padding:24px;width:100%;max-width:420px;max-height:80vh;overflow-y:auto}
-.tut-title{font-size:18px;font-weight:800;color:#fff;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.06)}
-.tut-section{margin-bottom:12px}
-.tut-section h4{font-size:13px;font-weight:700;margin-bottom:6px;color:#81c784}
-.tut-section h4.warn{color:#ffb74d}
-.tut-section ul{list-style:none;padding:0}
-.tut-section li{font-size:13px;color:rgba(255,255,255,0.7);padding:4px 0 4px 16px;position:relative}
-.tut-section li::before{content:'•';position:absolute;left:2px;color:rgba(255,255,255,0.3)}
-.tut-tips{font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6}
-.tut-actions{display:flex;gap:10px;margin-top:16px}
-.btn-done{flex:1;padding:12px;border:none;border-radius:12px;background:linear-gradient(135deg,#1565c0,#1976d2);color:#fff;font-size:14px;font-weight:700;cursor:pointer}
-.btn-done:active{transform:scale(0.97)}
-.btn-close{flex:1;padding:12px;border:1px solid rgba(255,255,255,0.1);border-radius:12px;background:transparent;color:rgba(255,255,255,0.6);font-size:14px;cursor:pointer}
-
-.floating-emoji{position:fixed;font-size:40px;pointer-events:none;z-index:200;animation:emojiFloat 1.5s ease-out forwards}
-@keyframes emojiFloat{0%{transform:translateY(0) scale(0.5);opacity:1}100%{transform:translateY(-120px) scale(1.2);opacity:0}}
-
-@media(max-width:400px){
-  .pos-btn{font-size:12px;padding:6px 10px}
-  .tut-modal{padding:18px}
-}</style>
+</style>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0a1628">
-<script charset="utf-8" src="https://map.qq.com/api/gljs?v=1.exp&key=KANBZ-A2FCI-ZLUG4-U73J2-EFP3E-7XBKO"></script>
 </head>
 <body>
 <div class="bg-ball">⚽</div>
@@ -136,17 +131,17 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <h2>⚽ 龙港新势力</h2>
     <div class="sub">足球训练打卡 · 云端同步</div>
     <div class="error" id="loginError"></div>
-    <input type="text" id="loginEmail" placeholder="邮箱" autocomplete="email">
-    <input type="password" id="loginPassword" placeholder="密码" autocomplete="current-password">
-    <button class="btn-primary" id="loginBtn" type="button" onclick="login()" onclick="login()">登录</button>
-    <div class="divider">输入昵称+密码，数据自动同步</div>
-    <button class="btn-ghost" onclick="skipLogin()">先看看 🌟</button>
+    <input type="email" id="loginEmail" placeholder="邮箱" autocomplete="email">
+    <input type="password" id="loginPassword" placeholder="密码 (6位以上)">
+    <button class="btn-primary" id="loginBtn" onclick="login()">登录 / 注册</button>
+    <div class="divider">注册后自动登录，数据云端同步</div>
+    <button class="btn-ghost" onclick="skipLogin()">先看看 👀</button>
   </div>
 </div>
 
 <div class="header" id="appHeader" style="display:none">
   <div class="header-top">
-    <h1><img src="images/logo.png" alt="LOGO" style="height:32px;width:32px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:8px">龙港新势力训练计划</h1>
+    <h1>⚽ 龙港新势力</h1>
     <div style="display:flex;align-items:center;gap:8px">
       <div class="user-badge" id="userBadge" onclick="logout()">
         <div class="user-avatar" id="userAvatar">?</div>
@@ -156,13 +151,12 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     </div>
   </div>
   <div class="header-actions">
-    <button class="action-btn" onclick="exportData()">🗑️ 导出</button>
-    <button class="action-btn" onclick="document.getElementById('importInput').click()">📌 导入</button>
-    <button class="action-btn" onclick="resetWeek()" style="color:#ff6b35">🔄 重置本周</button>
+    <button class="action-btn" onclick="exportData()">📤 导出</button>
+    <button class="action-btn" onclick="document.getElementById('importInput').click()">📥 导入</button>
     <input type="file" id="importInput" accept=".json" style="display:none" onchange="importData(event)">
   </div>
   <div class="date-display" id="dateDisplay"></div>
-  
+  <div class="week-grid" id="weekGrid"></div>
 </div>
 
 <div class="pos-bar" id="posBar" style="display:none"></div>
@@ -193,7 +187,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       <ul id="tutSteps"></ul>
     </div>
     <div class="tut-section">
-      <h4 class="warn">👍 常见错误</h4>
+      <h4 class="warn">⚠️ 常见错误</h4>
       <ul id="tutMistakes"></ul>
     </div>
     <div class="tut-section">
@@ -205,774 +199,3 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     </div>
   </div>
 </div>
-
-<script>
-var SUPABASE_URL = "https://zskhfoognaolccysvkgc.supabase.co";
-var SUPABASE_ANON_KEY = "sb_publishable_n2DUeMtq6tmvygpAwqOY5w_ZHUwMBnC";
-var _supabase = null;
-var _currentUser = null;
-var _syncing = false;
-var selDay = new Date().getDay();
-var curPosKey = localStorage.getItem("posKey") || "边后卫";
-var _clickedEx = null;
-
-
-
-
-
-var EMOS = ["🎉","🔥","💪","⭐","🌟","🏆","✨","😎"];
-var DAYS = ["日","一","二","三","四","五","六"];
-
-// ===== Supabase helpers (defined first, before login) =====
-function getSupabase() {
-  if (_supabase) return _supabase;
-  _supabase = {
-    url: SUPABASE_URL,
-    key: SUPABASE_ANON_KEY,
-    headers: function() {
-      var h = {"apikey": this.key, "Content-Type": "application/json"};
-      if (_currentUser && _currentUser.token) h["Authorization"] = "Bearer " + _currentUser.token;
-      return h;
-    }
-  };
-  return _supabase;
-}
-
-async function supabaseSignIn(email, password) {
-  // Use email as username, generate local userId (skip Supabase email auth)
-  var uid = "u_" + encodeURIComponent(email).replace(/%/g,'');
-  return {data: {user: {id: uid, email: email}}, error: null};
-}
-
-async function loadCloudData() {
-  if (!_currentUser) return null;
-  try {
-    var resp = await fetch("https://zskhfoognaolccysvkgc.supabase.co/rest/v1/checkins?id=eq." + _currentUser.id + "&limit=1", {
-      headers: {"apikey": "sb_publishable_n2DUeMtq6tmvygpAwqOY5w_ZHUwMBnC"}
-    });
-    var d = await resp.json();
-    return d && d[0] && d[0].data ? d[0].data : null;
-  } catch(e) { return null; }
-}
-
-async function saveCloudData(dataObj) {
-  if (_syncing || !_currentUser) return;
-  _syncing = true;
-  try {
-    await fetch("https://zskhfoognaolccysvkgc.supabase.co/rest/v1/checkins", {
-      method: "POST",
-      headers: {"apikey": "sb_publishable_n2DUeMtq6tmvygpAwqOY5w_ZHUwMBnC", "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates"},
-      body: JSON.stringify({id: _currentUser.id, data: dataObj, updated_at: new Date().toISOString()})
-    });
-  } catch(e) {}
-  _syncing = false;
-}
-
-function getPlan(d) { var p = PLANS[curPosKey]; return p && p[String(d)] ? p[String(d)] : null; }
-function getTip(name) { for(var k in TIPS) { if(name.indexOf(k) >= 0) return TIPS[k]; } return null; }
-function todayKey() { var d = new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
-function getLocalData() { try { return JSON.parse(localStorage.getItem("data")) || {}; } catch(e) { return {}; } }
-function saveLocalData(d) { localStorage.setItem("data", JSON.stringify(d)); }
-
-function getData() {
-  var local = getLocalData();
-  if (_currentUser && _currentUser.cloudData) {
-    var merged = {};
-    for(var k in _currentUser.cloudData) merged[k] = _currentUser.cloudData[k];
-    for(var k in local) if(!merged[k]) merged[k] = local[k];
-    return merged;
-  }
-  return local;
-}
-
-function saveData(d) {
-  saveLocalData(d);
-  if (_currentUser) saveCloudData(d);
-}
-
-// ===== Auth =====
-function login() {
-  var n = document.getElementById("loginEmail").value.trim();
-  var p = document.getElementById("loginPassword").value.trim();
-  var el = document.getElementById("loginError");
-  if (!n || !p) { el.style.display = "block"; el.innerText = "请填写昵称和密码"; return; }
-  el.style.display = "none";
-  _currentUser = {id: "u_" + n, email: n, token: n};
-  localStorage.setItem("sb_user", JSON.stringify(_currentUser));
-  showApp();
-}function skipLogin() { showApp(); }
-
-function logout() {
-  if (confirm("确定要退出登录吗？")) {
-    _currentUser = null;
-    localStorage.removeItem("sb_user");
-    location.reload();
-  }
-}
-
-function showApp() { try {
-  document.getElementById("loginOverlay").style.display = "none";
-  document.getElementById("appHeader").style.display = "block";
-  document.getElementById("posBar").style.display = "flex";
-  document.getElementById("dayBar").style.display = "flex";
-  document.getElementById("mainContent").style.display = "block";
-  if (_currentUser) {
-    var name = _currentUser.email.split("@")[0];
-    document.getElementById("userName").innerText = name;
-    document.getElementById("userAvatar").innerText = name.charAt(0).toUpperCase();
-  } else {
-    document.getElementById("userName").innerText = "游客";
-    document.getElementById("userAvatar").innerText = "?";
-  }
-  render();
-
- } catch(e) { alert("错误: "+e.message); } } function exportData() {
-  var data = getData();
-  if (Object.keys(data).length === 0) { showNotif("暂无打卡数据"); return; }
-  var blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
-  var a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "足球打卡_数据_" + new Date().toISOString().slice(0, 10) + ".json";
-  a.click();
-  URL.revokeObjectURL(a.href);
-  showNotif("数据已导出");
-}
-
-function importData(e) {
-  var file = e.target.files[0]; if (!file) return;
-  var reader = new FileReader();
-  reader.onload = function(ev) {
-    try {
-      var imported = JSON.parse(ev.target.result);
-      if (typeof imported !== "object" || imported === null) { showNotif("文件格式错误"); return; }
-      var data = getData();
-      var count = 0;
-      for (var k in imported) { if (!data[k]) { data[k] = imported[k]; count++; } }
-      saveData(data);
-      render();
-      showNotif("成功导入 " + count + " 条记录");
-    } catch(e) { showNotif("文件解析失败"); }
-  };
-  reader.readAsText(file);
-  e.target.value = "";
-}
-
-function showNotif(msg) {
-  var old = document.querySelector(".notification"); if (old) old.remove();
-  var n = document.createElement("div"); n.className = "notification"; n.innerText = msg;
-  document.body.appendChild(n);
-  setTimeout(function() { n.style.opacity = "0"; n.style.transition = "opacity 0.3s"; setTimeout(function() { n.remove(); }, 300); }, 2000);
-}
-
-// ===== Render =====
-function resetWeek(){if(!confirm("确定重置本周训练进度？这将清除本周所有打卡记录。"))return;var d=getData();var n=new Date();var c=0;for(var i=0;i<7;i++){var w=new Date(n);w.setDate(n.getDate()-n.getDay()+i);var k=w.getFullYear()+"-"+(w.getMonth()+1)+"-"+w.getDate();if(d[k]){delete d[k];c++}}saveData(d);render();showNotif("已重置 "+c+" 条");}
-
-function render() {
-  var now = new Date(), tk = todayKey();
-  document.getElementById("dateDisplay").innerText = now.getFullYear() + "年" + (now.getMonth()+1) + "月" + now.getDate() + "日 周" + ["日","一","二","三","四","五","六"][now.getDay()] + " | " + ["周休","上身训练日","下身训练日","足球训练日","上身训练日","下身训练日","周休"][selDay];
-
-  var ph = "", pl = ["边后卫","中后卫","中场","前锋","守门员"], pi = ["🛡️","🧱","🎯","⚡","🧤"];
-  for (var i = 0; i < pl.length; i++) {
-    var ic = pi[i]; var ac = pl[i] === curPosKey ? "active" : "";
-    ph += "<button class=\"pos-btn " + ac + "\" data-pos=\"" + pl[i] + "\">" + ic + " " + pl[i] + "</button>";
-  }
-  document.getElementById("posBar").innerHTML = ph;
-
-  var data = getData(), keys = Object.keys(data);
-  var dh = "";
-  for (var i = 0; i < 7; i++) {
-    var cls = "day-btn";
-    if (i === now.getDay()) cls += " today";
-    if (i === selDay && i !== now.getDay()) cls += " active";
-    if (i === 0 || i === 6) cls += " rest";
-    var tag = "", tc = "day-tag";
-    if (i === 0 || i === 6) { tag = "休"; tc += " restday"; } else if (i === 1 || i === 4) { tag = "上身"; tc += " upper"; } else if (i === 2 || i === 5) { tag = "下身"; tc += " lower"; } else if (i === 3) { tag = "足球"; tc += " football"; }
-    var wd_=new Date(now);wd_.setDate(now.getDate()-now.getDay()+i);var wk_=wd_.getFullYear()+"-"+(wd_.getMonth()+1)+"-"+wd_.getDate();var done_=data[wk_]?"✅":"";dh+="<div class=\""+cls+"\" onclick=\"selDayClick("+i+")\">"+DAYS[i]+"<span class=\""+tc+"\">"+tag+"</span><span class=\"day-date\">"+wd_.getDate()+" "+done_+"</span></div>";
-  }
-  document.getElementById("dayBar").innerHTML = dh;
-
-  document.getElementById("streakBadge").innerText = keys.length + "天";
-  var streakCount = 0, sk = Object.keys(data).sort().reverse();
-  for (var i = 0; i < sk.length; i++) { var cd = new Date(); cd.setDate(cd.getDate() - i); var ck = cd.getFullYear() + "-" + (cd.getMonth() + 1) + "-" + cd.getDate(); if (data[ck]) streakCount++; else break; }
-  document.getElementById("statsRow").innerHTML = "<div class=\"stat-item\"><div class=\"stat-icon\">🔥</div><div class=\"stat-num\">" + streakCount + "</div><div class=\"stat-label\">连续打卡</div></div><div class=\"stat-item\"><div class=\"stat-icon\">📅</div><div class=\"stat-num\">" + keys.length + "</div><div class=\"stat-label\">总天数</div></div><div class=\"stat-item\"><div class=\"stat-icon\">⭐</div><div class=\"stat-num\">" + now.getDate() + "</div><div class=\"stat-label\">" + ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][now.getMonth()] + "</div></div>";
-
-  
-
-  var weekDone = 0;
-  for (var i = 1; i <= 5; i++) { var wd = new Date(now); wd.setDate(now.getDate() - now.getDay() + i); var wk = wd.getFullYear() + "-" + (wd.getMonth() + 1) + "-" + wd.getDate(); if (data[wk]) weekDone++; }
-  document.getElementById("weeklyBar").style.width = Math.round(weekDone / 5 * 100) + "%";
-  document.getElementById("weekProgressText").innerText = weekDone + "/5 天";
-
-  var plan = getPlan(selDay), list = document.getElementById("exerciseList"), title = document.getElementById("planTitle"), dur = document.getElementById("planDur"), note = document.getElementById("planNote"), ptype = document.getElementById("planType"), pheader = document.getElementById("planHeader"), btn = document.getElementById("checkinBtn");
-
-  if (!plan || selDay === 0 || selDay === 6) {
-    pheader.className = "plan-header rest-bg"; ptype.className = "card-type";
-    ptype.innerText = "休息日"; title.innerText = ""; dur.innerText = "";
-    note.innerText = "好好休息，恢复体能";
-    list.innerHTML = "<div class=\"empty-state\"><div class=\"big\">🛋️</div><div class=\"txt\">今天休息，让身体充分恢复</div></div>";
-    if (selDay === now.getDay() && !data[tk]) { btn.className = "checkin-btn rest"; btn.innerText = "完成休息"; btn.style.display = "block"; } else { btn.style.display = "none"; }
-    return;
-  }
-
-  pheader.className = "plan-header " + (selDay === 1 || selDay === 4 ? "upper-bg" : selDay === 2 || selDay === 5 ? "lower-bg" : "football-bg");
-  ptype.className = "card-type " + (selDay === 1 || selDay === 4 ? "upper" : selDay === 2 || selDay === 5 ? "lower" : "football");
-  ptype.innerText = selDay === 1 || selDay === 4 ? "上半身力量" : selDay === 2 || selDay === 5 ? "下半身力量" : "足球专项";
-  title.innerText = plan.t + " - " + curPosKey;
-  dur.innerText = plan.d;
-  note.innerText = plan.n;
-
-  var td = new Date(now); td.setDate(now.getDate() - now.getDay() + selDay);
-  var tk2 = td.getFullYear() + "-" + (td.getMonth() + 1) + "-" + td.getDate();
-  var checked = !!data[tk2];
-
-  if (checked) { list.innerHTML = plan.e.map(function(ex, i) { return "<div class=\"exercise done\"><div class=\"check-circle\">✅</div><div class=\"ex-info\"><div class=\"ex-name\">" + ex[0] + "</div><div class=\"ex-detail\">" + ex[1] + "</div></div></div>"; }).join(""); btn.style.display = "none"; return; }
-  list.innerHTML = plan.e.map(function(ex, i) { return "<div class=\"exercise\" data-idx=\"" + i + "\" data-name=\"" + ex[0] + "\" data-detail=\"" + ex[1] + "\"><div class=\"check-circle\" id=\"chk" + i + "\"></div><div class=\"ex-info\"><div class=\"ex-name\">" + ex[0] + "</div><div class=\"ex-detail\">" + ex[1] + "</div></div><div class=\"ex-num\">" + (i + 1) + "</div></div>"; }).join("");
-  btn.style.display = "block"; btn.className = "checkin-btn"; btn.innerText = "完成今日打卡";
-}
-
-function selDayClick(d) { selDay = d; render(); }
-function selPos(p) { curPosKey = p; localStorage.setItem("posKey", p); render(); }
-
-function showEmoji(extra) {
-  var list = extra ? [extra].concat(EMOS) : EMOS;
-  for (var i = 0; i < 5; i++) {
-    var e = document.createElement("div"); e.className = "floating-emoji";
-    e.innerText = list[Math.floor(Math.random() * list.length)];
-    e.style.left = (10 + Math.random() * 80) + "vw"; e.style.top = (20 + Math.random() * 40) + "vh";
-    document.body.appendChild(e);
-    setTimeout(function() { e.remove(); }, 1500);
-  }
-}
-
-async function doCheckin() {
-  var now = new Date(), key = todayKey(), data = getData();
-  data[key] = {date: key, day: now.getDay(), at: new Date().toISOString()};
-  saveData(data);
-  if (_currentUser) saveCloudData(data);
-  showEmoji();
-  render();}
-document.getElementById("posBar").addEventListener("click", function(e) { var b = e.target.closest(".pos-btn"); if (b && b.dataset.pos) { selPos(b.dataset.pos); return; } });
-document.getElementById("exerciseList").addEventListener("click", function(e) {
-  var item = e.target.closest(".exercise"); if (!item || item.classList.contains("done")) return;
-  var name = item.getAttribute("data-name") || "", tip = getTip(name), o = document.getElementById("tutOverlay");
-  document.getElementById("tutTitle").innerText = name;
-  if (tip) { document.getElementById("tutSteps").innerHTML = tip.s.map(function(s) { return "<li>" + s + "</li>"; }).join(""); document.getElementById("tutMistakes").innerHTML = tip.m.map(function(m) { return "<li>" + m + "</li>"; }).join(""); document.getElementById("tutTips").innerText = tip.t; }
-  else { document.getElementById("tutSteps").innerHTML = "<li>保持正确姿势</li><li>控制动作速度</li>"; document.getElementById("tutMistakes").innerHTML = "<li>不要借用惯性</li>"; document.getElementById("tutTips").innerText = "质量优先于数量。循序渐进增加负荷。"; }
-  _clickedEx = item; o.classList.add("show");
-});
-
-function markDone() { if (_clickedEx) { _clickedEx.classList.add("done"); var ck = _clickedEx.querySelector(".check-circle"); if (ck) ck.innerText = "✅"; showEmoji("✅"); } closeTut(); }
-function closeTut() { document.getElementById("tutOverlay").classList.remove("show"); _clickedEx = null; }
-
-window.onload = function() {
-  var saved = localStorage.getItem("sb_user");
-  if (saved) {
-    try { _currentUser = JSON.parse(saved); } catch(e) {}
-  }
-  // Auto test login
-  setTimeout(function() {
-    document.getElementById("loginEmail").value = "testuser";
-    document.getElementById("loginPassword").value = "123456";
-    try {
-      login();
-      document.title = "SUCCESS";
-    } catch(e) {
-      document.title = "ERR:" + e.message.substring(0,50);
-      alert("Login error: " + e.message);
-    }
-  }, 1000);
-};
-
-
-
-var PLANS = {"边后卫":{"1":{"t":"周一 · 上半身力量","d":"60min","n":"边后卫需要上肢对抗能力，重点发展推力和拉力的平衡。","e":[["弹力带肩关节激活","热身 5min"],["杠铃卧推","4x8-12"],["引体向上","4x8-12"],["哑铃坐姿推举","3x10-12"],["杠铃划船","4x10-12"],["农夫行走","3x30m"],["二头弯举+三头下压","3x10+12"],["平板支撑+侧支撑","3x45s+30s"],["拉伸放松","冷身 5min"]]},"2":{"t":"周二 · 下半身力量","d":"60min","n":"边后卫需要爆发力和耐力，单腿力量是关键。","e":[["动态拉伸+空蹲跳","热身 5min"],["杠铃深蹲","4x8-10"],["保加利亚分腿蹲","3x10/腿"],["罗马尼亚硬拉","4x10-12"],["负重臀推","3x12-15"],["单腿提踏","3x15/腿"],["站姿提踵","4x15-20"],["反向卷腹","3x15"],["静态拉伸","冷身 5min"]]},"3":{"t":"周三 · 足球专项训练","d":"60-90min","n":"边路传中是核心武器。","e":[["慢跑+动态拉伸+颠球","热身"],["折返跑 5-10-15m","4组"],["Z字变向+急停","4组"],["静止球传中","各 15次"],["带球下底传中","各 10次"],["1v1攻防+滑步","10回合"],["反复冲刺跑","5组"],["静态拉伸","冷身"]]},"4":{"t":"周四 · 上半身力量","d":"60min","n":"加强肩背力量，提升对抗时的卡位能力。","e":[["弹力带肩关节环绕","热身 5min"],["负重俯卧撑","4x10-15"],["哑铃划船","4x10-12"],["哑铃推举","3x10-12"],["引体向上","4x8-12"],["面拉","3x15"],["波比跳","3x10"],["上肢拉伸","冷身 5min"]]},"5":{"t":"周五 · 下半身力量","d":"60min","n":"冲刺和变向能力依赖下肢爆发力。","e":[["慢跑+高抬腿+开合跳","热身 5min"],["杠铃深蹲","5x8-10"],["箭步蹲行走","3x12/腿"],["硬拉","4x8-10"],["跳箱训练","3x6"],["侧向弓步","3x10/侧"],["核心稳定性训练","3组"],["静态拉伸","冷身 5min"]]}},"中后卫":{"1":{"t":"周一 · 上半身力量","d":"60min","n":"中后卫需要上身力量争顶和对抗，重点发展推力。","e":[["肩关节环绕+弹力带激活","热身 5min"],["杠铃卧推","5x8-12"],["引体向上","4x8-12"],["哑铃推举","4x10-12"],["杠铃划船","4x10-12"],["高竹筐推举","3x10"],["平板支撑+侧支撑","3x60s+40s"],["拉伸放松","冷身 5min"]]},"2":{"t":"周二 · 下半身力量","d":"60min","n":"弹跳和对抗是中后卫核心，深蹲硬拉是基础。","e":[["动态拉伸+跳箱","热身 5min"],["杠铃深蹲","5x8-10"],["罗马尼亚硬拉","4x10-12"],["保加利亚分腿蹲","3x10/腿"],["负重臀推","3x12-15"],["站姿提踵","4x15-20"],["反向卷腹","3x15"],["静态拉伸","冷身 5min"]]},"3":{"t":"周三 · 足球专项训练","d":"60-90min","n":"头球解围和回追是中后卫核心。","e":[["慢跑+动态拉伸","热身 5min"],["头球争顶","各 20次"],["回追冲刺30m","6组"],["1v1防守+卡位","10回合"],["长传解围+出球","各 15次"],["折返跑+滑步","4组"],["小场地防守对抗","20min"],["静态拉伸","冷身"]]},"4":{"t":"周四 · 上半身力量","d":"60min","n":"强化上肢力量和核心稳定性。","e":[["弹力带肩关节激活","热身 5min"],["负重俯卧撑","4x10-15"],["哑铃划船","4x10-12"],["哑铃推举","3x10-12"],["引体向上","4x8-12"],["药球过顶砸地","3x10"],["农夫行走","3x30m"],["上肢拉伸","冷身 5min"]]},"5":{"t":"周五 · 下半身力量","d":"60min","n":"爆发力和耐力决定中后卫的防守覆盖范围。","e":[["慢跑+空蹲跳","热身 5min"],["杠铃深蹲","5x8-10"],["硬拉","4x8-10"],["跳箱训练","4x6"],["负重箭步蹲","3x10/腿"],["核心抗旋转训练","3组"],["30m冲刺跑","6组"],["静态拉伸","冷身 5min"]]}},"中场":{"1":{"t":"周一 · 力量（下肢+核心）","d":"70min","n":"下肢爆发力+核心稳定是中场基础。","e":[["动感单车","热身 10min"],["泡沫轴激活下肢","热身 10min"],["弹震式深蹲（慢下快上）","5×5 40kg"],["杠铃后撤步加抬腿（核心收紧抬腿要快）","3×6 40kg"],["哑铃单腿罗马尼亚硬拉（核心收紧）","3×8 15-20kg"],["哑铃单边推举加侧弓步","3×8 10-15kg"],["瑜伽球臀桥（锻炼后群）","3×10"],["哥本哈根支撑（内收肌训练）","3×20-30s"],["动态侧平板","3×10 2.5kg"]]},"2":{"t":"周二 · 高强度有球（控球10min+HIIT+传控）","d":"75min","n":"带球慢跑5分钟+颠球30次热身，控球训练10分钟（V字推拉3min+内外侧交替触球3min+踩球转身4min），不喧宾夺主。","e":[["带球慢跑","热身 5min"],["颠球","热身 30次"],["脚底V字推拉（左右脚交替）","控球 3min"],["脚内侧+外侧快速交替触球（原地高频）","控球 3min"],["原地踩球+突然拉球转身（左右交替）","控球 4min"],["25米带球冲刺→急停转身→慢跑回（触球≥3次）","12组 组间休息45s"],["对墙单触回传（每20次插入30s踩球）","左右脚各80次"],["接反弹球停向一侧传出","左右各50次"],["全身拉伸放松","冷身 10min"]]},"3":{"t":"周三 · 力量（功能性训练）","d":"70min","n":"核心抗旋转和单侧力量，提升场上对抗稳定性。","e":[["泡沫轴","热身 10min"],["核心激活","热身"],["杠铃片摇摆（双手各15kg）","4×8 30kg总重"],["弓步交替抗旋","4×12 10-15kg"],["单腿杠铃环绕（每侧）","4×8/侧 10-15kg"],["绳索上劈（龙门架）","3×12 自选"],["绳索下劈（同上）","3×12 自选"],["单支撑哑铃卧推","3×8 15-17.5kg"],["单腿俯身划船（对侧手拿哑铃）","3×8 15-20kg"]]},"4":{"t":"周四 · 力量（下肢爆发）+ 轻量有球","d":"80min","n":"单车热身10min，下肢爆发力为主，力量后休息5分钟执行轻量有球。","e":[["单车","热身 10min"],["单腿臀桥（爆发）","4×10 20-25kg杠铃片"],["地雷杆侧弓步（不算杆重）","3×8 40kg片"],["火箭推（双手）","3×10 20kg片"],["地雷杆单腿蹲","4×8 10-15kg"],["深蹲跳（半蹲起跳蹬地要快）","3×5 20-30kg"],["哑铃分腿蹲","3×8 10-15kg"],["后腿抬高跳（膝盖碰胸）","4×10 自重"],["后腿抬高左右跳","3×10 自重"],["休息5分钟"],["颠球（脚/大腿/头交替）","5min"],["原地控球（V字推拉+踩球转身各2.5min）","5min"]]},"5":{"t":"周五 · 主动恢复（轻量有球+控球激活）","d":"50min","n":"低强度技术日，保持球感不增加疲劳。","e":[["脚底横向拉球（左右脚交替）","控球 3min"],["脚内侧扣球变向（原地）","控球 3min"],["慢速带球+急停踩球（10米往返）","控球 4min"],["颠球（目标连续100次不落地）","10min"],["对墙轻量传接","15min"],["泡沫轴全身放松","15min"]]},"6":{"t":"周六 · 实战比赛+赛后加练","d":"120min","n":"比赛中刻意执行：抬头观察、跑动接应在传球线路上、尝试至少3次长传转移。赛后加练射门和长传。","e":[["正式/业余比赛","90min"],["休息","10min"],["正脚背抽射","10次"],["内脚背弧线","10次"],["外脚背射门","10次"],["凌空射门","10次"],["长传转移（左右脚各15次目标30m外）","30次"],["冷身+冰敷","15min"]]},"7":{"t":"周日 · 完全休息","d":"—","n":"不做任何训练，保证8-9小时睡眠。","e":[["充分睡眠","8-9小时"],["营养补充","高蛋白饮食"],["泡沫轴轻量放松（可选）","10min"]]}},"前锋":{"1":{"t":"周一 · 上半身力量","d":"60min","n":"前锋需要背身拿球能力，上肢力量决定护球效果。","e":[["肩关节激活+弹力带","热身 5min"],["杠铃卧推","5x8-12"],["引体向上","4x8-12"],["哑铃推举","3x10-12"],["杠铃划船","4x10-12"],["哑铃侧平举","3x12-15"],["平板支撑+俄罗斯转体","3x45s+30s"],["拉伸放松","冷身 5min"]]},"2":{"t":"周二 · 下半身力量","d":"60min","n":"爆发力决定前锋上限，深蹲和跳箱是核心。","e":[["动态拉伸+纵跳","热身 5min"],["杠铃深蹲","5x8-10"],["保加利亚分腿蹲","3x10/腿"],["罗马尼亚硬拉","4x10-12"],["跳箱训练","4x6"],["负重臀推","3x12-15"],["站姿提踵","4x15-20"],["30m冲刺跑","6组"],["静态拉伸","冷身 5min"]]},"3":{"t":"周三 · 足球专项训练","d":"60-90min","n":"前锋核心是射门和跑位。","e":[["动态拉伸+加速跑","热身"],["禁区前射门","各 15次"],["跑动中接球射门","各 12次"],["单刀球处理","10次"],["头球攻门","20次"],["反越位前插跑位","各 10次"],["小场地对抗赛","20min"],["静态拉伸","冷身"]]},"4":{"t":"周四 · 上半身力量","d":"60min","n":"前锋需要力量对抗中卫。","e":[["弹力带肩关节激活","热身 5min"],["负重俯卧撑","4x10-15"],["哑铃划船","4x10-12"],["哑铃推举","3x10-12"],["引体向上","4x8-12"],["背身护球模拟","3组"],["波比跳","3x10"],["上肢拉伸","冷身 5min"]]},"5":{"t":"周五 · 下半身力量","d":"60min","n":"加速能力和变向是前锋突破的关键。","e":[["慢跑+动态拉伸+冲刺","热身"],["杠铃深蹲","5x8-10"],["硬拉","4x8-10"],["负重箭步蹲","3x10/腿"],["跳箱训练","4x6"],["核心抗旋转训练","3组"],["立定跳远","5次"],["静态拉伸","冷身"]]}},"守门员":{"1":{"t":"周一 · 上半身力量","d":"60min","n":"守门员上肢力量决定扑救范围。","e":[["手腕脚踝激活","热身 5min"],["杠铃卧推","5x8-12"],["引体向上","4x8-12"],["哑铃推举","4x10-12"],["杠铃划船","4x10-12"],["药球过顶砸地","3x12"],["三头下压+二头弯举","3x10+12"],["平板支撑","3x60s"],["拉伸放松","冷身 5min"]]},"2":{"t":"周二 · 下半身力量","d":"60min","n":"守门员弹跳和爆发力决定扑救上限。","e":[["蹦跳+踝关节激活","热身 5min"],["杠铃深蹲","5x8-10"],["深蹲跳","4x10"],["跳箱训练","4x8"],["罗马尼亚硬拉","4x10-12"],["坐姿腿弯举","3x12-15"],["站姿提踵","4x15-20"],["立定跳远","5次"],["静态拉伸","冷身 5min"]]},"3":{"t":"周三 · 足球专项训练","d":"60-90min","n":"反应和出击时机是门将生命线。","e":[["横向滑步+手腕激活","热身"],["接地滚球+分边","各 20次"],["左右侧扑","各 15次"],["单刀球出击","15次"],["角球出击接高球","10次"],["大脚开球+手抛球","各 15次"],["短距离冲刺+横移","5组"],["静态拉伸","冷身"]]},"4":{"t":"周四 · 上半身力量","d":"60min","n":"守门员需要强大的上肢爆发力。","e":[["肩关节环绕+弹力带","热身"],["负重俯卧撑","4x10-15"],["哑铃划船","4x10-12"],["哑铃推举","3x10-12"],["引体向上","4x8-12"],["药球胸前推","3x10"],["面拉","3x15"],["上肢拉伸","冷身 5min"]]},"5":{"t":"周五 · 下半身力量","d":"60min","n":"门将的横向移动和弹跳依赖下肢爆发力。","e":[["慢跑+横向滑步+蹦跳","热身"],["杠铃深蹲","5x8-10"],["深蹲跳","4x10"],["跳箱训练","4x8"],["硬拉","4x8-10"],["侧向弓步","3x10/侧"],["核心抗旋转训练","3组"],["静态拉伸","冷身"]]}}};
-
-var TIPS = {"卧推":{s:["肩胛骨收紧贴凳","杠铃下放至胸中线","推起时呼气锁定"],m:["肩膀前送","杠铃落点太低"],t:"从空杠开始热身，递增重量。"},"深蹲":{s:["杠铃位置在斜方肌上","下蹲时膝盖对准脚尖","大腿平行地面"],m:["膝盖内扣","身体过度前倾"],t:"从50%重量热身，逐组递增。"},"硬拉":{s:["杠铃贴近小腿","背部挺直核心收紧","髋部发力前推"],m:["圆背拉起","杠铃远离身体"],t:"硬拉不做力竭组。"},"引体向上":{s:["正握肩宽","拉至下巴过杠","缓慢下放控制"],m:["身体晃动借力","下放太快"],t:"用弹力带辅助。"},"射门":{s:["支撑脚指向目标","脚背绷直摆腿","随球动作完整"],m:["身体后仰打高","支撑脚太远"],t:"先练定点，再练跑动中射门。"},"扑救":{s:["快速横移面对球","蹬地发力侧扑","手型呈W型"],m:["眼睛闭起来","手型松散"],t:"集中注意力预判。"}};
-
-var EMOS = ["🎉","🔥","💪","⭐","🌟","🏆","✨","😎"];
-var DAYS = ["日","一","二","三","四","五","六"];
-var selDay = new Date().getDay();
-var curPosKey = localStorage.getItem("posKey") || "边后卫";
-var _clickedEx = null;
-var _currentUser = null;
-var _supabase = null;
-var _syncing = false;
-
-function getPlan(d){var p=PLANS[curPosKey];return p&&p[String(d)]?p[String(d)]:null}
-function getTip(name){for(var k in TIPS){if(name.indexOf(k)>=0)return TIPS[k]}return null}
-function todayKey(){var d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()}
-function getLocalData(){try{return JSON.parse(localStorage.getItem("data"))||{}}catch(e){return{}}}
-function saveLocalData(d){localStorage.setItem("data",JSON.stringify(d))}
-function showNotif(m){var o=document.querySelector(".notification");if(o)o.remove();var n=document.createElement("div");n.className="notification";n.innerText=m;document.body.appendChild(n);setTimeout(function(){n.style.opacity="0";n.style.transition="opacity 0.3s";setTimeout(function(){n.remove()},300)},2000)}
-
-// Supabase
-function getSupabase(){if(_supabase)return _supabase;_supabase={url:"https://zskhfoognaolccysvkgc.supabase.co",key:"sb_publishable_n2DUeMtq6tmvygpAwqOY5w_ZHUwMBnC",h:function(){var r={"apikey":this.key,"Content-Type":"application/json"};if(_currentUser&&_currentUser.token)r["Authorization"]="Bearer "+_currentUser.token;return r}};return _supabase}
-async function supabaseLogin(e,p){var s=getSupabase();if(!s)return{error:"no config"};try{var r1=await fetch(s.url+"/auth/v1/token?grant_type=password",{method:"POST",headers:{"apikey":s.key,"Content-Type":"application/json"},body:JSON.stringify({email:e,password:p})});var d1=await r1.json();if(d1.access_token){_currentUser={id:d1.user.id,email:d1.user.email,token:d1.access_token};localStorage.setItem("sb_user",JSON.stringify(_currentUser));return{data:d1}}var r2=await fetch(s.url+"/auth/v1/signup",{method:"POST",headers:{"apikey":s.key,"Content-Type":"application/json"},body:JSON.stringify({email:e,password:p})});var d2=await r2.json();if(d2.id){_currentUser={id:d2.id,email:e,token:null};localStorage.setItem("sb_user",JSON.stringify(_currentUser));return{data:d2}}return{error:"signup failed"}}catch(e){return{error:e.message}}}
-async function loadCloudData(){var s=getSupabase();if(!s||!_currentUser)return null;try{var r=await fetch(s.url+"/rest/v1/checkins?id=eq."+_currentUser.id,{headers:s.h()});var d=await r.json();return d&&d[0]&&d[0].data?d[0].data:null}catch(e){return null}}
-async function saveCloudData(d){if(_syncing)return;_syncing=true;var s=getSupabase();if(!s||!_currentUser){_syncing=false;return}try{await fetch(s.url+"/rest/v1/checkins",{method:"POST",headers:s.h(),body:JSON.stringify({id:_currentUser.id,data:d,updated_at:new Date().toISOString()})})}catch(e){}_syncing=false}
-function getData(){var l=getLocalData();if(_currentUser&&_currentUser.cloudData){var m={};for(var k in _currentUser.cloudData)m[k]=_currentUser.cloudData[k];for(var k in l)if(!m[k])m[k]=l[k];return m}return l}
-function saveData(d){saveLocalData(d);if(_currentUser)saveCloudData(d)}
-
-function skipLogin(){showApp()}
-function logout(){if(confirm("退出登录?")){_currentUser=null;localStorage.removeItem("sb_user");location.reload()}}
-function exportData(){var d=getData();if(Object.keys(d).length===0){showNotif("无数据");return}var b=new Blob([JSON.stringify(d,null,2)],{type:"application/json"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="足球打卡_"+new Date().toISOString().slice(0,10)+".json";a.click();showNotif("已导出")}
-function importData(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){try{var i=JSON.parse(ev.target.result);if(typeof i!=="object"||i===null){showNotif("格式错误");return}var d=getData();var c=0;for(var k in i){if(!d[k]){d[k]=i[k];c++}}saveData(d);render();showNotif("导入 "+c+" 条")}catch(e){showNotif("解析失败")}};r.readAsText(f);e.target.value=""}
-
-
-function selDayClick(d){selDay=d;render()}
-function selPos(p){curPosKey=p;localStorage.setItem("posKey",p);render()}
-function showEmoji(x){var l=x?[x].concat(EMOS):EMOS;for(var i=0;i<5;i++){var e=document.createElement("div");e.className="floating-emoji";e.innerText=l[Math.floor(Math.random()*l.length)];e.style.left=(10+Math.random()*80)+"vw";e.style.top=(20+Math.random()*40)+"vh";document.body.appendChild(e);setTimeout(function(){e.remove()},1500)}}
-async function doCheckin(){var n=new Date(),k=todayKey(),d=getData();d[k]={date:k,day:n.getDay(),at:new Date().toISOString()};saveData(d);if(_currentUser)saveCloudData(d);showEmoji();render()}
-document.getElementById("posBar").addEventListener("click",function(e){var b=e.target.closest(".pos-btn");if(b&&b.dataset.pos){selPos(b.dataset.pos)}})
-document.getElementById("exerciseList").addEventListener("click",function(e){var i=e.target.closest(".exercise");if(!i||i.classList.contains("done"))return;var n=i.getAttribute("data-name")||"",t=getTip(n),o=document.getElementById("tutOverlay");document.getElementById("tutTitle").innerText=n;if(t){document.getElementById("tutSteps").innerHTML=t.s.map(function(s){return"<li>"+s+"</li>"}).join("");document.getElementById("tutMistakes").innerHTML=t.m.map(function(m){return"<li>"+m+"</li>"}).join("");document.getElementById("tutTips").innerText=t.t}else{document.getElementById("tutSteps").innerHTML="<li>保持正确姿势</li>";document.getElementById("tutMistakes").innerHTML="<li>不要借用惯性</li>";document.getElementById("tutTips").innerText="质量优先于数量。"}_clickedEx=i;o.classList.add("show")})
-function markDone(){if(_clickedEx){_clickedEx.classList.add("done");var c=_clickedEx.querySelector(".check-circle");if(c)c.innerText="✓";showEmoji("✅")}closeTut()}
-function closeTut(){document.getElementById("tutOverlay").classList.remove("show");_clickedEx=null}
-window.onload=function(){var s=localStorage.getItem("sb_user");if(s){try{_currentUser=JSON.parse(s)}catch(e){}}}
-
-</script>
-
-<!-- ===== 底部导航 ===== -->
-<div class="bottom-nav" id="bottomNav">
-  <div class="nav-item nav-active" onclick="switchTab('checkin')" id="navCheckin">
-    <span>🏠</span>
-    <span class="nav-label">打卡</span>
-  </div>
-  <div class="nav-item" onclick="switchTab('exercises')" id="navExercises">
-    <span>🏋️</span>
-    <span class="nav-label">动作库</span>
-  </div>
-  <div class="nav-item" onclick="switchTab('fields')" id="navFields">
-    <span>⚽</span>
-    <span class="nav-label">球场</span>
-  </div>
-  <div class="nav-item" onclick="switchTab('mine')" id="navMine">
-    <span>👤</span>
-    <span class="nav-label">我的</span>
-  </div>
-</div>
-
-<!-- ===== 动作库板块 ===== -->
-<div class="tab-content" id="tabExercises" style="display:none">
-  <div class="ex-header">
-    <h1>🏋️ 动作教学库</h1>
-  </div>
-  <div class="ex-search"><input placeholder="搜索动作..." oninput="exSearch(this.value)" /></div>
-  <div class="ex-cats" id="exCats"></div>
-  <div class="ex-list" id="exList"></div>
-</div>
-
-<!-- ===== 附近球场板块 ===== -->
-<div class="tab-content" id="tabFields" style="display:none">
-  <div class="ex-header">
-    <h1>⚽ 附近球场</h1>
-  </div>
-  <div class="field-loc-bar">
-    <span id="locText">📍 点击定位获取附近球场</span>
-    <button class="loc-btn" onclick="getLocation()">定位</button>
-  </div>
-  <div class="field-list" id="fieldList"></div>
-</div>
-
-<!-- ===== 我的板块 ===== -->
-<div class="tab-content" id="tabMine" style="display:none">
-  <div class="ex-header">
-    <h1>👤 我的</h1>
-  </div>
-  <div class="mine-card">
-    <div class="mine-user">
-      <div class="mine-avatar" id="mineAvatar">?</div>
-      <div><div class="mine-name" id="mineName">用户</div><div class="mine-email" id="mineEmail">加载中...</div></div>
-    </div>
-  </div>
-  <div class="mine-card">
-    <div class="mine-stat"><span>🔥 连续打卡</span><span class="mine-num" id="mStreak">0天</span></div>
-    <div class="mine-stat"><span>📅 总天数</span><span class="mine-num" id="mTotal">0天</span></div>
-    <div class="mine-stat"><span>⭐ 本周进度</span><span class="mine-num" id="mWeek">0/7</span></div>
-  </div>
-  <div class="mine-card">
-    <div class="mine-menu" onclick="resetWeek()">🔄 重置本周进度</div>
-    <div class="mine-menu" onclick="exportData()">📤 导出数据</div>
-    <div class="mine-menu" onclick="importData()">📥 导入数据</div>
-  </div>
-  <button class="mine-logout" onclick="doLogout()">退出登录</button>
-</div>
-
-<!-- ===== 动作详情弹窗 ===== -->
-<div class="modal-overlay" id="exModal" onclick="closeExModal()">
-  <div class="modal-content" onclick="event.stopPropagation()">
-    <div class="modal-ico" id="modalIco">⚽</div>
-    <div class="modal-name" id="modalName">动作名称</div>
-    <div class="modal-desc" id="modalDesc">动作描述</div>
-    <div class="modal-tags" id="modalTags"></div>
-    <div class="modal-steps" id="modalSteps"></div>
-    <button class="modal-close" onclick="closeExModal()">关闭</button>
-  </div>
-</div>
-
-<style>
-/* ===== 底部导航 ===== */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(10,22,40,0.95);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-around;padding:6px 0 env(safe-area-inset-bottom,6px)}
-.nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 12px;cursor:pointer;font-size:20px;color:rgba(255,255,255,0.4);transition:all 0.15s;border-radius:12px}
-.nav-item.nav-active{color:#1976d2}
-.nav-item.nav-active .nav-label{color:#1976d2;font-weight:700}
-.nav-label{font-size:10px;color:rgba(255,255,255,0.4)}
-
-/* ===== Tab 内容 ===== */
-.tab-content{padding-bottom:70px;display:none}
-.tab-content:first-of-type{display:block}
-
-/* ===== 动作库 ===== */
-.ex-header{padding:12px 16px 8px;background:rgba(10,22,40,0.95);border-bottom:1px solid rgba(255,255,255,0.06);position:sticky;top:0;z-index:10}
-.ex-header h1{font-size:20px;font-weight:900;background:linear-gradient(90deg,#fff,#90caf9);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.ex-search{padding:10px 16px}
-.ex-search input{width:100%;padding:10px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:#fff;font-size:14px;outline:none;box-sizing:border-box}
-.ex-search input::placeholder{color:rgba(255,255,255,0.3)}
-.ex-cats{display:flex;gap:6px;padding:0 16px 10px;overflow-x:auto}
-.ex-cat{padding:4px 14px;border-radius:20px;font-size:12px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.6);cursor:pointer;white-space:nowrap}
-.ex-cat.ex-cat-active{background:linear-gradient(135deg,#1565c0,#1976d2);color:#fff;font-weight:700}
-.ex-list{padding:0 16px}
-.ex-card{display:flex;background:rgba(255,255,255,0.04);border-radius:16px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all 0.15s}
-.ex-card:active{transform:scale(0.98);background:rgba(255,255,255,0.08)}
-.ex-ico{width:70px;height:70px;border-radius:12px;background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;font-size:36px;margin-right:14px;flex-shrink:0}
-.ex-info{flex:1}
-.ex-name{font-size:15px;font-weight:700;color:#fff;display:block;margin-bottom:4px}
-.ex-desc{font-size:12px;color:rgba(255,255,255,0.5);display:block;margin-bottom:4px}
-.ex-tag{font-size:11px;color:#90caf9}
-
-/* ===== 弹窗 ===== */
-.modal-overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;padding:20px}
-.modal-overlay.show{display:flex}
-.modal-content{background:rgba(20,35,60,0.98);backdrop-filter:blur(20px);border-radius:24px;border:1px solid rgba(255,255,255,0.1);padding:28px;width:100%;max-width:400px;max-height:80vh;overflow-y:auto}
-.modal-ico{font-size:64px;text-align:center;margin-bottom:8px}
-.modal-name{font-size:20px;font-weight:800;color:#fff;text-align:center}
-.modal-desc{font-size:13px;color:rgba(255,255,255,0.5);text-align:center;margin:8px 0 16px}
-.modal-tags{display:flex;gap:8px;justify-content:center;margin-bottom:16px}
-.modal-tag{padding:4px 12px;border-radius:12px;font-size:12px;background:rgba(25,118,210,0.15);color:#90caf9}
-.modal-steps-title{font-size:15px;font-weight:700;color:#90caf9;margin-bottom:10px;display:block}
-.modal-step{display:block;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:13px;color:#e0e0e0}
-.modal-close{width:100%;padding:10px;border:none;border-radius:12px;background:linear-gradient(135deg,#1565c0,#1976d2);color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-top:16px}
-
-/* ===== 球场 ===== */
-.field-loc-bar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:rgba(255,255,255,0.03)}.field-search-bar{padding:0 16px 10px}.field-search-bar input{width:100%;padding:10px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:#fff;font-size:13px;outline:none;box-sizing:border-box}.field-search-bar input::placeholder{color:rgba(255,255,255,0.3)}
-#locText{flex:1;font-size:13px;color:rgba(255,255,255,0.6)}
-.loc-btn{padding:6px 16px;border:none;border-radius:20px;background:linear-gradient(135deg,#1565c0,#1976d2);color:#fff;font-size:12px;cursor:pointer}
-.field-list{padding:0 16px}
-.field-card{background:rgba(255,255,255,0.04);border-radius:16px;padding:16px;margin-bottom:10px}
-.field-top{display:flex;justify-content:space-between;align-items:center}
-.field-name{font-size:16px;font-weight:700;color:#fff}
-.field-dist{font-size:12px;color:#90caf9}
-.field-addr{font-size:12px;color:rgba(255,255,255,0.4);display:block;margin:6px 0}
-.field-tags{display:flex;gap:6px;margin:8px 0}
-.field-tag{padding:2px 10px;border-radius:10px;font-size:11px;background:rgba(25,118,210,0.1);color:#90caf9}
-.field-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
-.field-price{font-size:16px;font-weight:700;color:#4ade80}
-.field-actions{display:flex;gap:8px}
-.field-btn{padding:6px 14px;border:none;border-radius:10px;font-size:12px;cursor:pointer}
-.field-btn-call{background:rgba(255,255,255,0.06);color:#e0e0e0}
-.field-btn-nav{background:rgba(25,118,210,0.2);color:#90caf9}
-
-/* ===== 我的 ===== */
-.mine-card{background:rgba(255,255,255,0.04);border-radius:16px;margin:0 16px 10px;padding:16px}
-.mine-user{display:flex;align-items:center;gap:12px}
-.mine-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#1565c0,#1976d2);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff}
-.mine-name{font-size:16px;font-weight:700;color:#fff}
-.mine-email{font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px}
-.mine-stat{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:14px;color:#e0e0e0}
-.mine-stat:last-child{border-bottom:none}
-.mine-num{font-size:18px;font-weight:800;color:#fff}
-.mine-menu{padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:14px;color:#e0e0e0;cursor:pointer}
-.mine-menu:last-child{border-bottom:none}
-.mine-logout{width:calc(100% - 32px);margin:10px 16px 0;padding:12px;border:none;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#ff5252;font-size:15px;font-weight:600;cursor:pointer}
-</style>
-
-<script>
-// ===== 底部导航切换 =====
-var currentTab = 'checkin';
-
-function switchTab(tab) {
-  document.querySelectorAll('.tab-content').forEach(function(el) { el.style.display = 'none'; });
-  var map = { checkin: 'tabExercises', exercises: 'tabExercises', fields: 'tabFields', mine: 'tabMine' };
-  var contentId = map[tab] || 'tabExercises';
-  var el = document.getElementById(contentId);
-  if (el) el.style.display = 'block';
-  
-  // 打卡页面特殊处理（原来页面）
-  var mainContent = document.querySelector('.main-content');
-  if (mainContent) mainContent.style.display = tab === 'checkin' ? 'block' : 'none';
-  
-  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('nav-active'); });
-  var navMap = { checkin: 'navCheckin', exercises: 'navExercises', fields: 'navFields', mine: 'navMine' };
-  var navEl = document.getElementById(navMap[tab]);
-  if (navEl) navEl.classList.add('nav-active');
-  
-  currentTab = tab;
-  if (tab === 'exercises') renderExercises();
-  if (tab === 'fields') renderFields();
-  if (tab === 'mine') renderMine();
-}
-
-// ===== 动作库数据 =====
-var EX_DATA = [
-  {ico:"⚡",name:"正脚背抽射",desc:"远距离大力射门",cat:"射门",diff:"★★☆",detail:"支撑脚指向目标方向，脚背绷直，膝盖对准球，摆腿发力击球中部，随球动作完整跟进"},
-  {ico:"🌀",name:"内脚背弧线球",desc:"绕过防守队员的弧线射门",cat:"射门",diff:"★★★",detail:"支撑脚指向目标偏左，用脚内侧击球底部偏右，随球动作向右上方摆动，球会产生弧线绕过防守"},
-  {ico:"💥",name:"外脚背弹射",desc:"出其不意的快速射门",cat:"射门",diff:"★★★",detail:"支撑脚站稳，脚踝锁定用外脚背击球，发力短促干脆，球路会产生外旋"},
-  {ico:"🦵",name:"凌空抽射",desc:"不等球落地直接射门",cat:"射门",diff:"★★★★",detail:"判断落点调整步点，身体稍后仰，脚背绷直等待球下落至膝高时，腰腹发力带动摆腿抽射"},
-  {ico:"📤",name:"脚内侧推传",desc:"最基础最准确的传球",cat:"传球",diff:"★☆☆",detail:"支撑脚指向目标，脚内侧打开90度，推击球中部，动作简洁不拖沓"},
-  {ico:"↗️",name:"外脚背传球",desc:"快速出球适合边路转移",cat:"传球",diff:"★★☆",detail:"支撑脚站稳，脚踝内扣用外脚背触球，发力短促，球速快线路平直"},
-  {ico:"📡",name:"长传转移",desc:"改变进攻方向的关键技术",cat:"传球",diff:"★★★",detail:"支撑脚站位稍远，用脚内侧大力击球底部，随球动作高而长，球产生高弧度远距离飞行"},
-  {ico:"🎯",name:"直塞球",desc:"穿透防线送出身后球",cat:"传球",diff:"★★★",detail:"观察队友跑位时机，脚内侧推击球中下部，力度控制要精准，球速快穿越防线"},
-  {ico:"🔄",name:"V字推拉",desc:"原地控球基础动作",cat:"盘带",diff:"★☆☆",detail:"用脚底将球向后拉，迅速用同一只脚向前推，左右脚交替进行，保持低重心和节奏"},
-  {ico:"🚲",name:"踩单车",desc:"晃开防守队员重心",cat:"盘带",diff:"★★★",detail:"身体重心下沉，一只脚从球上方绕过，迅速换另一只脚绕过，向反方向加速突破"},
-  {ico:"💫",name:"马赛回旋",desc:"优雅的转身过人",cat:"盘带",diff:"★★★★",detail:"用一只脚踩球向后拉，身体同时旋转180度，另一只脚接球向前，动作要连贯流畅"},
-  {ico:"🐂",name:"牛尾巴过人",desc:"快速变向突破",cat:"盘带",diff:"★★★★",detail:"用脚外侧向一侧拨球，迅速切换脚内侧扣向另一侧，身体重心随之快速变向，加速摆脱防守"},
-  {ico:"🛡️",name:"正面铲球",desc:"最后防线防守动作",cat:"防守",diff:"★★☆",detail:"降低重心接近对手，最后一步跨大，滑出用脚将球捅走，注意安全避免受伤"},
-  {ico:"🪖",name:"头球解围",desc:"高空球防守",cat:"防守",diff:"★★☆",detail:"判断落点提前移动，眼睛盯住球，用前额发力顶球，向两侧或前方解围"},
-  {ico:"🧱",name:"卡位防守",desc:"用身体挡住进攻队员",cat:"防守",diff:"★★☆",detail:"用身体隔开对手和球，屈膝降低重心，手臂适度张开保持平衡，不轻易出脚"},
-  {ico:"🎯",name:"头球攻门",desc:"角球和传中终结方式",cat:"头球",diff:"★★★",detail:"判断传中落点，起跳时机要准，腰腹发力带动颈部，用前额顶向球门方向"},
-  {ico:"🏃",name:"冲刺跑",desc:"提升爆发力基础训练",cat:"体能",diff:"★☆☆",detail:"起跑姿势低重心，前几步短促有力，摆臂配合步伐，逐渐抬头看前方"},
-  {ico:"↩️",name:"折返跑",desc:"模拟比赛反复冲刺",cat:"体能",diff:"★★☆",detail:"从起点全力冲刺，到达标志点急停，转身再冲刺返回，注意急停时重心控制"},
-  {ico:"🧤",name:"侧扑",desc:"守门员基础扑救动作",cat:"守门",diff:"★★★",detail:"快速横移步调整，向侧方蹬地发力，身体伸展手臂张开，手型呈W型接球"},
-  {ico:"🥅",name:"接地滚球",desc:"守门员基本功",cat:"守门",diff:"★☆☆",detail:"膝盖微屈降低重心，双手掌心向前，迎球方向身体正对，触球瞬间缓冲回收"}
-];
-
-var EX_CATS = ['全部','射门','传球','盘带','防守','头球','体能','守门'];
-var exCatIdx = 0;
-var exKw = '';
-
-function renderExercises() {
-  renderExCats();
-  renderExList();
-}
-
-function renderExCats() {
-  var html = '';
-  for (var i = 0; i < EX_CATS.length; i++) {
-    html += '<span class="ex-cat' + (i === exCatIdx ? ' ex-cat-active' : '') + '" onclick="selectExCat(' + i + ')">' + EX_CATS[i] + '</span>';
-  }
-  document.getElementById('exCats').innerHTML = html;
-}
-
-function selectExCat(i) { exCatIdx = i; renderExCats(); renderExList(); }
-
-function exSearch(val) { exKw = val; renderExList(); }
-
-function renderExList() {
-  var arr = EX_DATA.slice();
-  if (exCatIdx > 0) arr = arr.filter(function(x) { return x.cat === EX_CATS[exCatIdx]; });
-  if (exKw) arr = arr.filter(function(x) { return x.name.indexOf(exKw) >= 0 || x.desc.indexOf(exKw) >= 0; });
-  var html = '';
-  for (var i = 0; i < arr.length; i++) {
-    html += '<div class="ex-card" onclick="showExDetail(' + EX_DATA.indexOf(arr[i]) + ')">' +
-      '<div class="ex-ico">' + arr[i].ico + '</div>' +
-      '<div class="ex-info"><span class="ex-name">' + arr[i].name + '</span><span class="ex-desc">' + arr[i].desc + '</span><span class="ex-tag">' + arr[i].cat + ' · ' + arr[i].diff + '</span></div>' +
-      '</div>';
-  }
-  if (!html) html = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3)">没有找到匹配的动作</div>';
-  document.getElementById('exList').innerHTML = html;
-}
-
-function showExDetail(idx) {
-  var item = EX_DATA[idx];
-  if (!item) return;
-  document.getElementById('modalIco').textContent = item.ico;
-  document.getElementById('modalName').textContent = item.name;
-  document.getElementById('modalDesc').textContent = item.desc;
-  document.getElementById('modalTags').innerHTML = '<span class="modal-tag">🏷️ ' + item.cat + '</span><span class="modal-tag">📊 ' + item.diff + '</span>';
-  var steps = item.detail.split('，');
-  var stepsHtml = '<span class="modal-steps-title">📝 步骤要领</span>';
-  for (var i = 0; i < steps.length; i++) {
-    stepsHtml += '<span class="modal-step">' + (i+1) + '. ' + steps[i].trim() + '</span>';
-  }
-  document.getElementById('modalSteps').innerHTML = stepsHtml;
-  document.getElementById('exModal').classList.add('show');
-}
-
-function closeExModal() { document.getElementById('exModal').classList.remove('show'); }
-
-// ===== 球场 - 腾讯地图 API =====
-var map = null;
-var searchService = null;
-var markers = [];
-var currentLat = 0;
-var currentLng = 0;
-var cityTimer = null;
-
-function renderFields() {
-  document.getElementById('fieldList').innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3)">📍 点击"搜索附近"查找附近的球场</div>';
-  document.getElementById('locText').textContent = '📍 等待定位...';
-}
-
-function searchNearby() {
-  document.getElementById('fieldList').innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3)">⏳ 正在定位...</div>';
-  
-  // 先尝试获取位置
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(function(pos) {
-      currentLat = pos.coords.latitude;
-      currentLng = pos.coords.longitude;
-      document.getElementById('locText').textContent = '📍 当前位置：' + currentLat.toFixed(4) + ', ' + currentLng.toFixed(4);
-      doSearch(currentLat, currentLng, '');  // 改用空字符串
-    }, function() {
-      // 定位失败，用 IP 定位
-      ipLocate();
-    }, { enableHighAccuracy: true, timeout: 8000 });
-  } else {
-    ipLocate();
-  }
-}
-
-function ipLocate() {
-  document.getElementById('locText').textContent = '📍 正在通过IP定位...';
-  // 用腾讯地图 IP 定位
-  var script = document.createElement('script');
-  script.src = 'https://apis.map.qq.com/ws/location/v1/ip?key=KANBZ-A2FCI-ZLUG4-U73J2-EFP3E-7XBKO&output=jsonp&callback=onIPLocate';
-  document.head.appendChild(script);
-}
-
-function onIPLocate(res) {
-  if (res && res.result && res.result.location) {
-    currentLat = res.result.location.lat;
-    currentLng = res.result.location.lng;
-    document.getElementById('locText').textContent = '📍 ' + (res.result.ad_info ? res.result.ad_info.city : '当前位置');
-    doSearch(currentLat, currentLng, '');
-  } else {
-    // 默认成都
-    currentLat = 30.57;
-    currentLng = 104.07;
-    document.getElementById('locText').textContent = '📍 定位失败，默认显示成都';
-    doSearch(currentLat, currentLng, '');
-  }
-}
-
-function doSearch(lat, lng, keyword) {
-  document.getElementById('fieldList').innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3)">⏳ 正在搜索附近球场...</div>';
-  
-  var url = 'https://apis.map.qq.com/ws/place/v1/search?boundary=nearby(' + lat + ',' + lng + ',3000)&keyword=' + encodeURIComponent(keyword || '足球场|球场|足球') + '&key=KANBZ-A2FCI-ZLUG4-U73J2-EFP3E-7XBKO&output=jsonp&callback=onSearchResult';
-  
-  var script = document.createElement('script');
-  script.src = url;
-  document.head.appendChild(script);
-}
-
-function onSearchResult(res) {
-  if (!res || res.status !== 0 || !res.data || res.data.length === 0) {
-    document.getElementById('fieldList').innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3)">附近没有找到球场，试试扩大搜索范围</div>';
-    return;
-  }
-  
-  var data = res.data;
-  var html = '';
-  for (var i = 0; i < data.length; i++) {
-    var f = data[i];
-    var dist = f._distance ? (f._distance < 1000 ? Math.round(f._distance) + 'm' : (f._distance/1000).toFixed(1) + 'km') : '未知距离';
-    var tags = '';
-    if (f.category) {
-      var cats = f.category.split(';');
-      for (var j = 0; j < cats.length; j++) tags += '<span class="field-tag">' + cats[j] + '</span>';
-    }
-    if (!tags) tags = '<span class="field-tag">⚽ 球场</span>';
-    
-    html += '<div class="field-card">' +
-      '<div class="field-top"><span class="field-name">' + f.title + '</span><span class="field-dist">' + dist + '</span></div>' +
-      '<span class="field-addr">' + (f.address || '暂无地址') + '</span>' +
-      '<div class="field-tags">' + tags + '</div>' +
-      '<div class="field-bottom">' +
-      '<div class="field-actions"><button class="field-btn field-btn-nav" onclick="navField(' + f.location.lat + ',' + f.location.lng + ')">🗺️ 导航</button></div></div></div>';
-  }
-  if (!html) html = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3)">附近没有找到球场</div>';
-  document.getElementById('fieldList').innerHTML = html;
-}
-
-function citySearch(val) {
-  if (cityTimer) clearTimeout(cityTimer);
-  if (!val || val.length < 2) return;
-  cityTimer = setTimeout(function() {
-    document.getElementById('locText').textContent = '📍 搜索：' + val;
-    document.getElementById('fieldList').innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3)">⏳ 正在搜索...</div>';
-    
-    var url = 'https://apis.map.qq.com/ws/place/v1/search?boundary=region(' + encodeURIComponent(val) + ',0)&keyword=' + encodeURIComponent('足球场') + '&key=KANBZ-A2FCI-ZLUG4-U73J2-EFP3E-7XBKO&output=jsonp&callback=onSearchResult';
-    var script = document.createElement('script');
-    script.src = url;
-    document.head.appendChild(script);
-  }, 500);
-}
-
-function callField(phone) { window.location.href = 'tel:' + phone; }
-function navField(lat, lng) {
-  window.open('https://apis.map.qq.com/uri/v1/marker?marker=coord:' + lat + ',' + lng + '&title=球场');
-}
-
-// ===== 我的页面 =====
-function renderMine() {
-  var userStr = localStorage.getItem('_currentUser') || localStorage.getItem('sb_user');
-  if (userStr) {
-    try {
-      var u = JSON.parse(userStr);
-      document.getElementById('mineName').textContent = u.email ? u.email.split('@')[0] : '游客';
-      document.getElementById('mineEmail').textContent = u.email || '离线模式';
-      document.getElementById('mineAvatar').textContent = u.email ? u.email[0].toUpperCase() : '游';
-    } catch(e) {}
-  }
-  var data = getData();
-  var today = new Date();
-  var todayKey = today.getFullYear() + '-' + (today.getMonth()+1) + '-' + today.getDate();
-  var streak = data[todayKey] ? 1 : 0;
-  var d = new Date();
-  if (streak) { for (var i = 1; i < 365; i++) { d.setDate(d.getDate()-1); var k = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); if (data[k]) streak++; else break; } }
-  var total = Object.keys(data).filter(function(k) { return data[k]; }).length;
-  var weekCount = 0;
-  var now = new Date();
-  for (var i = 0; i < 7; i++) { var w = new Date(now); w.setDate(now.getDate()-now.getDay()+i+1); var wk = w.getFullYear()+'-'+(w.getMonth()+1)+'-'+w.getDate(); if (data[wk]) weekCount++; }
-  document.getElementById('mStreak').textContent = streak + '天';
-  document.getElementById('mTotal').textContent = total + '天';
-  document.getElementById('mWeek').textContent = weekCount + '/7';
-}
-
-function exportData() {
-  var data = JSON.stringify(getData());
-  var ta = document.createElement('textarea');
-  ta.value = data; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-  showNotif('数据已复制到剪贴板');
-}
-
-function importData() {
-  var d = prompt('请粘贴JSON格式的打卡数据：');
-  if (d) { try { var parsed = JSON.parse(d); saveData(parsed); renderMine(); showNotif('导入成功'); } catch(e) { alert('数据格式错误'); } }
-}
-
-function doLogout() {
-  if (confirm('确定要退出登录吗？')) {
-    localStorage.removeItem('_currentUser');
-    localStorage.removeItem('sb_user');
-    location.reload();
-  }
-}
-</script>
-
-</body>
-</html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
