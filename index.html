@@ -301,34 +301,16 @@ async function login() {
   var uid = "u_" + encodeURIComponent(email).replace(/%/g,'');
   _currentUser = {id: uid, email: email, token: uid};
   localStorage.setItem("sb_user", JSON.stringify(_currentUser));
-  // Load cloud data directly
+  // Try loading cloud data, ignore errors
   try {
-    var resp = await fetch("https://zskhfoognaolccysvkgc.supabase.co/rest/v1/checkins?id=eq." + uid + "&limit=1", {
-      headers: {"apikey": "sb_publishable_n2DUeMtq6tmvygpAwqOY5w_ZHUwMBnC"}
-    });
-    var d = await resp.json();
-    if (d && d[0] && d[0].data) {
-      _currentUser.cloudData = d[0].data;
-      var merged = {}; for(var k in d[0].data) merged[k] = d[0].data[k];
-      var local = getLocalData(); for(var k in local) if(!merged[k]) merged[k] = local[k];
-      saveLocalData(merged);
-    } else {
-      var local = getLocalData();
-      if (Object.keys(local).length > 0) {
-        await fetch("https://zskhfoognaolccysvkgc.supabase.co/rest/v1/checkins", {
-          method: "POST",
-          headers: {"apikey": "sb_publishable_n2DUeMtq6tmvygpAwqOY5w_ZHUwMBnC", "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates"},
-          body: JSON.stringify({id: uid, data: local})
-        });
-      }
-      _currentUser.cloudData = local;
-    }
+    var r = await fetch("https://zskhfoognaolccysvkgc.supabase.co/rest/v1/checkins?id=eq." + uid + "&limit=1", {headers: {"apikey":"sb_publishable_n2DUeMtq6tmvygpAwqOY5w_ZHUwMBnC"}});
+    var d = await r.json();
+    if (d && d[0] && d[0].data) { _currentUser.cloudData = d[0].data; }
   } catch(e) {}
   document.getElementById("loginBtn").disabled = false;
-  document.getElementById("loginBtn").innerText = "登录 / 注册";
+  document.getElementById("loginBtn").innerText = "进入";
   showApp();
 }
-
 function skipLogin() { showApp(); }
 
 function logout() {
@@ -568,6 +550,8 @@ window.onload=function(){var s=localStorage.getItem("sb_user");if(s){try{_curren
 </script>
 </body>
 </html>
+
+
 
 
 
