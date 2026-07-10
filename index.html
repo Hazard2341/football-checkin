@@ -431,6 +431,7 @@ function render() {
   }
   document.getElementById("posBar").innerHTML = ph;
 
+  var data = getData(), keys = Object.keys(data);
   var dh = "";
   for (var i = 0; i < 7; i++) {
     var cls = "day-btn";
@@ -443,7 +444,6 @@ function render() {
   }
   document.getElementById("dayBar").innerHTML = dh;
 
-  var data = getData(), keys = Object.keys(data);
   document.getElementById("streakBadge").innerText = keys.length + "天";
   var streakCount = 0, sk = Object.keys(data).sort().reverse();
   for (var i = 0; i < sk.length; i++) { var cd = new Date(); cd.setDate(cd.getDate() - i); var ck = cd.getFullYear() + "-" + (cd.getMonth() + 1) + "-" + cd.getDate(); if (data[ck]) streakCount++; else break; }
@@ -591,5 +591,7 @@ window.onload=function(){var s=localStorage.getItem("sb_user");if(s){try{_curren
 </script>
 </body>
 </html>
+
+
 
 
