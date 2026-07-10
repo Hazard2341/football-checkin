@@ -135,9 +135,9 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <h2>⚽ 龙港新势力</h2>
     <div class="sub">足球训练打卡 · 云端同步</div>
     <div class="error" id="loginError"></div>
-    <input type="email" id="loginEmail" placeholder="邮箱" autocomplete="email">
-    <input type="password" id="loginPassword" placeholder="密码 (6位以上)" autocomplete="current-password">
-    <button class="btn-primary" id="loginBtn" onclick="login()">登录</button>
+    <input type="text" id="loginEmail" placeholder="邮箱" autocomplete="email">
+    <input type="password" id="loginPassword" placeholder="密码" autocomplete="current-password">
+    <button class="btn-primary" id="loginBtn" type="button" onclick="login()">登录</button>
     <div class="divider">输入昵称+密码，数据自动同步</div>
     <button class="btn-ghost" onclick="skipLogin()">先看看 🌟</button>
   </div>
@@ -537,6 +537,7 @@ window.onload=function(){var s=localStorage.getItem("sb_user");if(s){try{_curren
 </script>
 </body>
 </html>
+
 
 
 
