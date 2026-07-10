@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>龙港新势力 · 足球训练打卡</title>
-<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
 <style>
 /* Login page */
 .login-overlay{position:fixed;inset:0;z-index:500;background:linear-gradient(135deg,#0a1628,#1a2a4a);display:flex;align-items:center;justify-content:center;padding:20px}
@@ -118,19 +118,75 @@ var _syncing = false;
 
 function getSupabase() {
   if (_supabase) return _supabase;
-  try {
-    _supabase = window.supabase.createClient(
-      "https://zskhfoognaolccysvkgc.supabase.co",
-      "sb_publishable_n2DUeMtq6tmvygpAwqOY5w_ZHUwMBnC"
-    );
-    return _supabase;
-  } catch(e) { console.warn("Supabase error:", e); return null; }
+  _supabase = {
+    url: "https://zskhfoognaolccysvkgc.supabase.co",
+    key: "sb_publishable_n2DUeMtq6tmvygpAwqOY5w_ZHUwMBnC",
+    headers: function() {
+      var h = {"apikey": this.key, "Content-Type": "application/json"};
+      if (_currentUser && _currentUser.token) h["Authorization"] = "Bearer " + _currentUser.token;
+      return h;
+    }
+  };
+  return _supabase;
 }
 
+// Replace supabase auth with direct REST API
+async function supabaseSignIn(email, password) {
+  var sb = getSupabase();
+  if (!sb) return {error: {message: "No Supabase config"}};
+  try {
+    var resp = await fetch(sb.url + "/auth/v1/token?grant_type=password", {
+      method: "POST",
+      headers: {"apikey": sb.key, "Content-Type": "application/json"},
+      body: JSON.stringify({email: email, password: password})
+    });
+    var data = await resp.json();
+    if (data.access_token) {
+      _currentUser = {id: data.user.id, email: data.user.email, token: data.access_token};
+      return {data: data, error: null};
+    }
+    // If sign in fails, try sign up
+    var resp2 = await fetch(sb.url + "/auth/v1/signup", {
+      method: "POST",
+      headers: {"apikey": sb.key, "Content-Type": "application/json"},
+      body: JSON.stringify({email: email, password: password})
+    });
+    var data2 = await resp2.json();
+    if (data2.id) {
+      _currentUser = {id: data2.id, email: email, token: null};
+      return {data: data2, error: null};
+    }
+    return {data: null, error: data2};
+  } catch(e) {
+    return {error: {message: e.message}};
+  }
+}
 
-var PLANS = {"边后卫":{"1":{"t":"周一 · 上半身力量","d":"60min","n":"边后卫需要上肢对抗能力，重点发展推力和拉力的平衡。","e":[["弹力带肩关节激活","热身 5min"],["杠铃卧推","4x8-12"],["引体向上","4x8-12"],["哑铃坐姿推举","3x10-12"],["杠铃划船","4x10-12"],["农夫行走","3x30m"],["二头弯举+三头下压","3x10+12"],["平板支撑+侧支撑","3x45s+30s"],["拉伸放松","冷身 5min"]]},"2":{"t":"周二 · 下半身力量","d":"60min","n":"边后卫需要爆发力和耐力，单腿力量是关键。","e":[["动态拉伸+空蹲跳","热身 5min"],["杠铃深蹲","4x8-10"],["保加利亚分腿蹲","3x10/腿"],["罗马尼亚硬拉","4x10-12"],["负重臀推","3x12-15"],["单腿提踏","3x15/腿"],["站姿提踵","4x15-20"],["反向卷腹","3x15"],["静态拉伸","冷身 5min"]]},"3":{"t":"周三 · 足球专项训练","d":"60-90min","n":"边路传中是核心武器，注意支撑脚指向和触球部位。","e":[["慢跑+动态拉伸+颠球","热身 5-10min"],["折返跑 5-10-15m","4组"],["Z字变向+急停","4组"],["静止球传中","各 15次"],["带球下底传中","各 10次"],["1v1攻防+滑步","10回合"],["反复冲刺跑 20mx3","5组"],["静态拉伸","冷身 5min"]]},"4":{"t":"周四 · 上半身力量","d":"60min","n":"加强肩背力量，提升对抗时的卡位能力。","e":[["弹力带肩关节环绕","热身 5min"],["负重俯卧撑","4x10-15"],["哑铃划船","4x10-12"],["哑铃推举","3x10-12"],["引体向上","4x8-12"],["面拉","3x15"],["波比跳","3x10"],["上肢拉伸","冷身 5min"]]},"5":{"t":"周五 · 下半身力量","d":"60min","n":"冲刺和变向能力依赖下肢爆发力。","e":[["慢跑+高抬腿+开合跳","热身 5min"],["杠铃深蹲","5x8-10"],["箭步蹲行走","3x12/腿"],["硬拉","4x8-10"],["跳箱训练","3x6"],["侧向弓步","3x10/侧"],["核心稳定性训练","3组"],["静态拉伸","冷身 5min"]]}},"中后卫":{"1":{"t":"周一 · 上半身力量","d":"60min","n":"中后卫需要上身力量争顶和对抗，重点发展推力。","e":[["肩关节环绕+弹力带激活","热身 5min"],["杠铃卧推","5x8-12"],["引体向上","4x8-12"],["哑铃推举","4x10-12"],["杠铃划船","4x10-12"],["高竹筐推举","3x10"],["平板支撑+侧支撑","3x60s+40s"],["拉伸放松","冷身 5min"]]},"2":{"t":"周二 · 下半身力量","d":"60min","n":"弹跳和对抗是中后卫核心，深蹲硬拉是基础。","e":[["动态拉伸+跳箱","热身 5min"],["杠铃深蹲","5x8-10"],["罗马尼亚硬拉","4x10-12"],["保加利亚分腿蹲","3x10/腿"],["负重臀推","3x12-15"],["站姿提踵","4x15-20"],["反向卷腹","3x15"],["静态拉伸","冷身 5min"]]},"3":{"t":"周三 · 足球专项训练","d":"60-90min","n":"头球解围和回追是中后卫核心。注意预判和站位。","e":[["慢跑+动态拉伸","热身 5min"],["头球争顶","各 20次"],["回追冲刺30m","6组"],["1v1防守+卡位","10回合"],["长传解围+出球","各 15次"],["折返跑+滑步","4组x30s"],["小场地防守对抗","20min"],["静态拉伸","冷身 5min"]]},"4":{"t":"周四 · 上半身力量","d":"60min","n":"强化上肢力量和核心稳定性，提升空中对抗。","e":[["弹力带肩关节激活","热身 5min"],["负重俯卧撑","4x10-15"],["哑铃划船","4x10-12"],["哑铃推举","3x10-12"],["引体向上","4x8-12"],["药球过顶砸地","3x10"],["农夫行走","3x30m"],["上肢拉伸","冷身 5min"]]},"5":{"t":"周五 · 下半身力量","d":"60min","n":"爆发力和耐力决定中后卫的防守覆盖范围。","e":[["慢跑+空蹲跳","热身 5min"],["杠铃深蹲","5x8-10"],["硬拉","4x8-10"],["跳箱训练","4x6"],["负重箭步蹲","3x10/腿"],["核心抗旋转训练","3组"],["30m冲刺跑","6组"],["静态拉伸","冷身 5min"]]}},"中场":{"1":{"t":"周一 · 上半身力量","d":"60min","n":"中场需要核心力量和上半身稳定性来护球。","e":[["肩关节环绕+弹力带激活","热身 5min"],["杠铃卧推","4x8-12"],["引体向上","4x8-12"],["哑铃坐姿推举","3x10-12"],["杠铃划船","4x10-12"],["俄罗斯转体","3x15/侧"],["二头弯举+三头下压","3x10+12"],["平板支撑","3x60s"],["拉伸放松","冷身 5min"]]},"2":{"t":"周二 · 下半身力量","d":"60min","n":"中场跑动距离最大，下肢耐力和力量并重。","e":[["动态拉伸+高抬腿","热身 5min"],["杠铃深蹲","4x8-10"],["罗马尼亚硬拉","4x10-12"],["箭步蹲行走","3x12/腿"],["负重臀推","3x12-15"],["坐姿腿弯举","3x12-15"],["站姿提踵","4x15-20"],["静态拉伸","冷身 5min"]]},"3":{"t":"周三 · 足球专项训练","d":"60-90min","n":"中场是节拍器，传球视野和组织能力是核心。","e":[["控球慢跑+颠球","热身 5-10min"],["一脚出球","4组x20次"],["长传转移","各 20次"],["转身+摆脱+传球","3组x10次"],["中场三角传球跑位","3组x2min"],["远射专项","各 15次"],["中场间歇跑","5组x200m"],["静态拉伸","冷身 5min"]]},"4":{"t":"周四 · 上半身力量","d":"60min","n":"中场需要良好的上半身力量来保护球权。","e":[["弹力带肩关节激活","热身 5min"],["负重俯卧撑","4x10-15"],["哑铃划船","4x10-12"],["哑铃推举","3x10-12"],["引体向上","4x8-12"],["面拉","3x15"],["核心力量训练","3组"],["上肢拉伸","冷身 5min"]]},"5":{"t":"周五 · 下半身力量","d":"60min","n":"中场覆盖全场，腿部力量和耐力决定表现。","e":[["慢跑+开合跳+高抬腿","热身 5min"],["杠铃深蹲","5x8-10"],["硬拉","4x8-10"],["保加利亚分腿蹲","3x10/腿"],["单腿提踏","3x15/腿"],["核心稳定性训练","3组"],["变速跑","4组x60s"],["静态拉伸","冷身 5min"]]}},"前锋":{"1":{"t":"周一 · 上半身力量","d":"60min","n":"前锋需要背身拿球能力，上肢力量决定护球效果。","e":[["肩关节激活+弹力带","热身 5min"],["杠铃卧推","5x8-12"],["引体向上","4x8-12"],["哑铃推举","3x10-12"],["杠铃划船","4x10-12"],["哑铃侧平举","3x12-15"],["平板支撑+俄罗斯转体","3x45s+30s"],["拉伸放松","冷身 5min"]]},"2":{"t":"周二 · 下半身力量","d":"60min","n":"爆发力决定前锋上限，深蹲和跳箱是核心。","e":[["动态拉伸+纵跳","热身 5min"],["杠铃深蹲","5x8-10"],["保加利亚分腿蹲","3x10/腿"],["罗马尼亚硬拉","4x10-12"],["跳箱训练","4x6"],["负重臀推","3x12-15"],["站姿提踵","4x15-20"],["30m冲刺跑","6组"],["静态拉伸","冷身 5min"]]},"3":{"t":"周三 · 足球专项训练","d":"60-90min","n":"前锋核心是射门和跑位。临门一脚决定比赛。","e":[["动态拉伸+加速跑","热身 5min"],["禁区前射门","各 15次"],["跑动中接球射门","各 12次"],["单刀球处理","10次"],["头球攻门","20次"],["反越位前插跑位","各 10次"],["小场地对抗赛","20min"],["静态拉伸","冷身 5min"]]},"4":{"t":"周四 · 上半身力量","d":"60min","n":"前锋需要力量对抗中卫，推拉动作都要强。","e":[["弹力带肩关节激活","热身 5min"],["负重俯卧撑","4x10-15"],["哑铃划船","4x10-12"],["哑铃推举","3x10-12"],["引体向上","4x8-12"],["背身护球模拟","3组x10次"],["波比跳","3x10"],["上肢拉伸","冷身 5min"]]},"5":{"t":"周五 · 下半身力量","d":"60min","n":"加速能力和变向是前锋突破的关键。","e":[["慢跑+动态拉伸+冲刺","热身 5min"],["杠铃深蹲","5x8-10"],["硬拉","4x8-10"],["负重箭步蹲","3x10/腿"],["跳箱训练","4x6"],["核心抗旋转训练","3组"],["立定跳远","5次"],["静态拉伸","冷身 5min"]]}},"守门员":{"1":{"t":"周一 · 上半身力量","d":"60min","n":"守门员上肢力量决定扑救范围和手抛球距离。","e":[["手腕脚踝激活","热身 5min"],["杠铃卧推","5x8-12"],["引体向上","4x8-12"],["哑铃推举","4x10-12"],["杠铃划船","4x10-12"],["药球过顶砸地","3x12"],["三头下压+二头弯举","3x10+12"],["平板支撑","3x60s"],["拉伸放松","冷身 5min"]]},"2":{"t":"周二 · 下半身力量","d":"60min","n":"守门员弹跳和爆发力决定扑救上限。","e":[["蹦跳+踝关节激活","热身 5min"],["杠铃深蹲","5x8-10"],["深蹲跳","4x10"],["跳箱训练","4x8"],["罗马尼亚硬拉","4x10-12"],["坐姿腿弯举","3x12-15"],["站姿提踵","4x15-20"],["立定跳远","5次"],["静态拉伸","冷身 5min"]]},"3":{"t":"周三 · 足球专项训练","d":"60-90min","n":"反应和出击时机是门将生命线。","e":[["横向滑步+手腕激活","热身 5min"],["接地滚球+分边","各 20次"],["左右侧扑","各 15次"],["单刀球出击","15次"],["角球出击接高球","10次"],["大脚开球+手抛球","各 15次"],["短距离冲刺+横移","5组x20m"],["静态拉伸","冷身 5min"]]},"4":{"t":"周四 · 上半身力量","d":"60min","n":"守门员需要强大的上肢爆发力来扑救。","e":[["肩关节环绕+弹力带","热身 5min"],["负重俯卧撑","4x10-15"],["哑铃划船","4x10-12"],["哑铃推举","3x10-12"],["引体向上","4x8-12"],["药球胸前推","3x10"],["面拉","3x15"],["上肢拉伸","冷身 5min"]]},"5":{"t":"周五 · 下半身力量","d":"60min","n":"门将的横向移动和弹跳依赖下肢爆发力。","e":[["慢跑+横向滑步+蹦跳","热身 5min"],["杠铃深蹲","5x8-10"],["深蹲跳","4x10"],["跳箱训练","4x8"],["硬拉","4x8-10"],["侧向弓步","3x10/侧"],["核心抗旋转训练","3组"],["静态拉伸","冷身 5min"]]}}};
-var TIPS = {"卧推":{s:["肩胛骨收紧贴凳","杠铃下放至胸中线","推起时呼气锁定"],m:["肩膀前送","杠铃落点太低"],t:"从空杠开始热身，递增重量。"},"深蹲":{s:["杠铃位置在斜方肌上","下蹲时膝盖对准脚尖","大腿平行地面"],m:["膝盖内扣","身体过度前倾"],t:"从50%重量热身，逐组递增。"},"硬拉":{s:["杠铃贴近小腿","背部挺直核心收紧","髋部发力前推"],m:["圆背拉起","杠铃远离身体"],t:"硬拉不做力竭组，保证动作质量。"},"引体向上":{s:["正握肩宽","拉至下巴过杠","缓慢下放控制"],m:["身体晃动借力","下放太快"],t:"用弹力带辅助或做负重引体递增。"},"射门":{s:["支撑脚指向目标","脚背绷直摆腿","随球动作完整"],m:["身体后仰打高","支撑脚太远"],t:"先练定点，再练跑动中射门。"},"传中":{s:["支撑脚指向球门方向","脚内侧兜弧线","随球动作指向落点"],m:["身体倾斜不够","触球部位不准"],t:"从不同角度练习，提升精准度。"},"扑救":{s:["快速横移保持面对球","蹬地发力侧扑","手型呈W型"],m:["眼睛闭起来","手型松散"],t:"集中注意力预判，不要等球来再反应。"}};
-function getPlan(d){var p=PLANS[curPosKey];return p&&p[String(d)]?p[String(d)]:null}
+// Replace supabase REST calls
+async function loadCloudData() {
+  var sb = getSupabase(); if (!sb || !_currentUser) return null;
+  try {
+    var resp = await fetch(sb.url + "/rest/v1/checkins?id=eq." + _currentUser.id, {
+      headers: sb.headers()
+    });
+    var data = await resp.json();
+    return data && data[0] && data[0].data ? data[0].data : null;
+  } catch(e) { return null; }
+}
+
+async function saveCloudData(dataObj) {
+  if (_syncing) return;
+  _syncing = true;
+  var sb = getSupabase(); if (!sb || !_currentUser) { _syncing = false; return; }
+  try {
+    await fetch(sb.url + "/rest/v1/checkins", {
+      method: "POST",
+      headers: sb.headers(),
+      body: JSON.stringify({id: _currentUser.id, data: dataObj, updated_at: new Date().toISOString()})
+    });
+  } catch(e) {}
+  _syncing = false;
+}function getPlan(d){var p=PLANS[curPosKey];return p&&p[String(d)]?p[String(d)]:null}
 function getTip(name){for(var k in TIPS){if(name.indexOf(k)>=0)return TIPS[k]}return null}
 function todayKey(){var d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
 function getLocalData(){try{return JSON.parse(localStorage.getItem('data'))||{}}catch(e){return{}}}
@@ -183,15 +239,15 @@ async function login() {
   document.getElementById('loginBtn').disabled=true;
   document.getElementById('loginBtn').innerText='正在登录...';
   try {
-    var {data,error} = await sb.auth.signInWithPassword({email,pw});
+    var {data,error} = await supabaseSignIn(email, pw);
     if(error) {
       if(error.message.includes('Invalid login credentials')) {
-        var {data:regData,error:regError} = await sb.auth.signUp({email,password:pw});
-        if(regError) throw regError;
-        data = regData;
+        
+        data = data;
       } else throw error;
     }
-    _currentUser = {id:data.user.id, email:data.user.email};
+    _currentUser = {id:data.user.id, email:data.user.email, token:data.access_token||null};
+  localStorage.setItem("sb_user", JSON.stringify(_currentUser));
     var cloudData = await loadCloudData();
     if(cloudData) {
       _currentUser.cloudData = cloudData;
@@ -347,16 +403,13 @@ function markDone(){if(_clickedEx){_clickedEx.classList.add('done');var ck=_clic
 function closeTut(){document.getElementById('tutOverlay').classList.remove('show');_clickedEx=null}
 
 window.onload = function() {
-  var sb = getSupabase();
-  if(sb) {
-    sb.auth.getSession().then(function(resp) {
-      if(resp.data && resp.data.session) {
-        _currentUser = {id:resp.data.session.user.id, email:resp.data.session.user.email};
-        loadCloudData().then(function(cd){ if(cd) _currentUser.cloudData = cd; showApp(); });
-      }
-    });
+  // Check if user was previously logged in via localStorage
+  var saved = localStorage.getItem("sb_user");
+  if (saved) {
+    try {
+      _currentUser = JSON.parse(saved);
+    } catch(e) {}
   }
-};
-</script>
+};</script>
 </body>
 </html>
