@@ -1,4 +1,4 @@
-﻿﻿<!DOCTYPE html>
+﻿﻿﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -513,25 +513,10 @@ function saveData(d){saveLocalData(d);if(_currentUser)saveCloudData(d)}
 
 function skipLogin(){showApp()}
 function logout(){if(confirm("退出登录?")){_currentUser=null;localStorage.removeItem("sb_user");location.reload()}}
-function showApp(){document.getElementById("loginOverlay").style.display="none";document.getElementById("appHeader").style.display="block";document.getElementById("posBar").style.display="flex";document.getElementById("dayBar").style.display="flex";document.getElementById("mainContent").style.display="block";if(_currentUser){var n=_currentUser.email.split("@")[0];document.getElementById("userName").innerText=n;document.getElementById("userAvatar").innerText=n.charAt(0).toUpperCase()}else{document.getElementById("userName").innerText="游客";document.getElementById("userAvatar").innerText="?"}render()}
 function exportData(){var d=getData();if(Object.keys(d).length===0){showNotif("无数据");return}var b=new Blob([JSON.stringify(d,null,2)],{type:"application/json"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="足球打卡_"+new Date().toISOString().slice(0,10)+".json";a.click();showNotif("已导出")}
 function importData(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){try{var i=JSON.parse(ev.target.result);if(typeof i!=="object"||i===null){showNotif("格式错误");return}var d=getData();var c=0;for(var k in i){if(!d[k]){d[k]=i[k];c++}}saveData(d);render();showNotif("导入 "+c+" 条")}catch(e){showNotif("解析失败")}};r.readAsText(f);e.target.value=""}
 
-function render(){var n=new Date(),tk=todayKey();document.getElementById("dateDisplay").innerText=n.toLocaleDateString("zh-CN",{year:"numeric",month:"long",day:"numeric",weekday:"long"})
-var ph="",pl=["边后卫","中后卫","中场","前锋","守门员"],pi=["🛡️","🧱","🎯","⚡","🧤"];for(var i=0;i<pl.length;i++){var ic=pi[i];var ac=pl[i]===curPosKey?"active":"";ph+="<button class=\"pos-btn "+ac+"\" data-pos=\""+pl[i]+"\">"+ic+" "+pl[i]+"</button>"}document.getElementById("posBar").innerHTML=ph
-var dh="";for(var i=0;i<7;i++){var c="day-btn";if(i===n.getDay())c+=" today";if(i===selDay&&i!==n.getDay())c+=" active";if(i===0||i===6)c+=" rest";var tg="",tc="day-tag";if(i===0||i===6){tg="休";tc+=" restday"}else if(i===1||i===4){tg="上身";tc+=" upper"}else if(i===2||i===5){tg="下身";tc+=" lower"}else if(i===3){tg="足球";tc+=" football"}dh+="<div class=\""+c+"\" onclick=\"selDayClick("+i+")\">"+DAYS[i]+"<span class=\""+tc+"\">"+tg+"</span></div>"}document.getElementById("dayBar").innerHTML=dh
-var data=getData(),keys=Object.keys(data);document.getElementById("streakBadge").innerText=keys.length+"天"
-var sc=0,sk=Object.keys(data).sort().reverse();for(var i=0;i<sk.length;i++){var cd=new Date();cd.setDate(cd.getDate()-i);var ck=cd.getFullYear()+"-"+(cd.getMonth()+1)+"-"+cd.getDate();if(data[ck])sc++;else break}
-document.getElementById("statsRow").innerHTML="<div class=\"stat-item\"><div class=\"stat-icon\">🔥</div><div class=\"stat-num\">"+sc+"</div><div class=\"stat-label\">连续打卡</div></div><div class=\"stat-item\"><div class=\"stat-icon\">📅</div><div class=\"stat-num\">"+keys.length+"</div><div class=\"stat-label\">总天数</div></div><div class=\"stat-item\"><div class=\"stat-icon\">⭐</div><div class=\"stat-num\">"+n.getDate()+"</div><div class=\"stat-label\">"+["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][n.getMonth()]+"</div></div>"
-var wg="";for(var i=0;i<7;i++){var wd=new Date(n);wd.setDate(n.getDate()-n.getDay()+i);var wk=wd.getFullYear()+"-"+(wd.getMonth()+1)+"-"+wd.getDate(),wc="wday"+(data[wk]?" done":"")+(wd.toDateString()===n.toDateString()?" t":"");wg+="<div class=\""+wc+"\">"+["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][wd.getDay()]+"</div>"}document.getElementById("weekGrid").innerHTML=wg
-var wd2=0;for(var i=1;i<=5;i++){var wd=new Date(n);wd.setDate(n.getDate()-n.getDay()+i);var wk=wd.getFullYear()+"-"+(wd.getMonth()+1)+"-"+wd.getDate();if(data[wk])wd2++}document.getElementById("weeklyBar").style.width=Math.round(wd2/5*100)+"%";document.getElementById("weekProgressText").innerText=wd2+"/5 天"
-var plan=getPlan(selDay),list=document.getElementById("exerciseList"),title=document.getElementById("planTitle"),dur=document.getElementById("planDur"),note=document.getElementById("planNote"),pt=document.getElementById("planType"),ph2=document.getElementById("planHeader"),btn=document.getElementById("checkinBtn")
-if(!plan||selDay===0||selDay===6){ph2.className="plan-header rest-bg";pt.className="card-type";pt.innerText="休息日";title.innerText="";dur.innerText="";note.innerText="好好休息";list.innerHTML="<div class=\"empty-state\"><div class=\"big\">🛋️</div><div class=\"txt\">今天休息</div></div>";if(selDay===n.getDay()&&!data[tk]){btn.className="checkin-btn rest";btn.innerText="完成休息";btn.style.display="block"}else{btn.style.display="none"}return}
-ph2.className="plan-header "+(selDay===1||selDay===4?"upper-bg":selDay===2||selDay===5?"lower-bg":"football-bg");pt.className="card-type "+(selDay===1||selDay===4?"upper":selDay===2||selDay===5?"lower":"football");pt.innerText=selDay===1||selDay===4?"上半身力量":selDay===2||selDay===5?"下半身力量":"足球专项";title.innerText=plan.t+" · "+curPosKey;dur.innerText=plan.d;note.innerText=plan.n
-var td=new Date(n);td.setDate(n.getDate()-n.getDay()+selDay);var tk2=td.getFullYear()+"-"+(td.getMonth()+1)+"-"+td.getDate();var checked=!!data[tk2]
-if(checked){list.innerHTML=plan.e.map(function(ex,i){return"<div class=\"exercise done\"><div class=\"check-circle\">✓</div><div class=\"ex-info\"><div class=\"ex-name\">"+ex[0]+"</div><div class=\"ex-detail\">"+ex[1]+"</div></div></div>"}).join("");btn.style.display="none";return}
-list.innerHTML=plan.e.map(function(ex,i){return"<div class=\"exercise\" data-idx=\""+i+"\" data-name=\""+ex[0]+"\" data-detail=\""+ex[1]+"\"><div class=\"check-circle\" id=\"chk"+i+"\"></div><div class=\"ex-info\"><div class=\"ex-name\">"+ex[0]+"</div><div class=\"ex-detail\">"+ex[1]+"</div></div><div class=\"ex-num\">"+(i+1)+"</div></div>"}).join("")
-btn.style.display="block";btn.className="checkin-btn";btn.innerText="完成今日打卡"}
+
 function selDayClick(d){selDay=d;render()}
 function selPos(p){curPosKey=p;localStorage.setItem("posKey",p);render()}
 function showEmoji(x){var l=x?[x].concat(EMOS):EMOS;for(var i=0;i<5;i++){var e=document.createElement("div");e.className="floating-emoji";e.innerText=l[Math.floor(Math.random()*l.length)];e.style.left=(10+Math.random()*80)+"vw";e.style.top=(20+Math.random()*40)+"vh";document.body.appendChild(e);setTimeout(function(){e.remove()},1500)}}
@@ -545,6 +530,9 @@ window.onload=function(){var s=localStorage.getItem("sb_user");if(s){try{_curren
 </script>
 </body>
 </html>
+
+
+
 
 
 
