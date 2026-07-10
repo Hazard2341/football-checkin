@@ -290,25 +290,14 @@ function saveData(d) {
 
 // ===== Auth =====
 async function login() {
-  var email = document.getElementById("loginEmail").value.trim();
-  var pw = document.getElementById("loginPassword").value.trim();
-  var errEl = document.getElementById("loginError");
-  if (!email || !pw) { errEl.style.display = "block"; errEl.innerText = "请填写昵称和密码"; return; }
-  if (pw.length < 6) { errEl.style.display = "block"; errEl.innerText = "密码至少6位"; return; }
-  errEl.style.display = "none";
-  document.getElementById("loginBtn").disabled = true;
-  document.getElementById("loginBtn").innerText = "登录中...";
-  var uid = "u_" + encodeURIComponent(email).replace(/%/g,'');
-  _currentUser = {id: uid, email: email, token: uid};
+  var n = document.getElementById("loginEmail").value.trim();
+  var p = document.getElementById("loginPassword").value.trim();
+  var e = document.getElementById("loginError");
+  if (!n || !p) { e.style.display = "block"; e.innerText = "请填写昵称和密码"; return; }
+  if (p.length < 6) { e.style.display = "block"; e.innerText = "密码至少6位"; return; }
+  e.style.display = "none";
+  _currentUser = {id: "u_" + n, email: n, token: n};
   localStorage.setItem("sb_user", JSON.stringify(_currentUser));
-  // Try loading cloud data, ignore errors
-  try {
-    var r = await fetch("https://zskhfoognaolccysvkgc.supabase.co/rest/v1/checkins?id=eq." + uid + "&limit=1", {headers: {"apikey":"sb_publishable_n2DUeMtq6tmvygpAwqOY5w_ZHUwMBnC"}});
-    var d = await r.json();
-    if (d && d[0] && d[0].data) { _currentUser.cloudData = d[0].data; }
-  } catch(e) {}
-  document.getElementById("loginBtn").disabled = false;
-  document.getElementById("loginBtn").innerText = "进入";
   showApp();
 }
 function skipLogin() { showApp(); }
@@ -321,7 +310,7 @@ function logout() {
   }
 }
 
-function showApp() {
+function showApp() { try {
   document.getElementById("loginOverlay").style.display = "none";
   document.getElementById("appHeader").style.display = "block";
   document.getElementById("posBar").style.display = "flex";
@@ -336,9 +325,8 @@ function showApp() {
     document.getElementById("userAvatar").innerText = "?";
   }
   render();
-}
 
-function exportData() {
+ } catch(e) { alert("错误: "+e.message); } } function exportData() {
   var data = getData();
   if (Object.keys(data).length === 0) { showNotif("暂无打卡数据"); return; }
   var blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
@@ -463,7 +451,6 @@ async function doCheckin() {
   if (_currentUser) saveCloudData(data);
   showEmoji();
   render();
-}
 
 document.getElementById("posBar").addEventListener("click", function(e) { var b = e.target.closest(".pos-btn"); if (b && b.dataset.pos) { selPos(b.dataset.pos); return; } });
 document.getElementById("exerciseList").addEventListener("click", function(e) {
@@ -550,6 +537,9 @@ window.onload=function(){var s=localStorage.getItem("sb_user");if(s){try{_curren
 </script>
 </body>
 </html>
+
+
+
 
 
 
