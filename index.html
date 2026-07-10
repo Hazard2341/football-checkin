@@ -450,8 +450,7 @@ async function doCheckin() {
   saveData(data);
   if (_currentUser) saveCloudData(data);
   showEmoji();
-  render();
-
+  render();}
 document.getElementById("posBar").addEventListener("click", function(e) { var b = e.target.closest(".pos-btn"); if (b && b.dataset.pos) { selPos(b.dataset.pos); return; } });
 document.getElementById("exerciseList").addEventListener("click", function(e) {
   var item = e.target.closest(".exercise"); if (!item || item.classList.contains("done")) return;
@@ -537,6 +536,7 @@ window.onload=function(){var s=localStorage.getItem("sb_user");if(s){try{_curren
 </script>
 </body>
 </html>
+
 
 
 
