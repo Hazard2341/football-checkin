@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -110,22 +110,22 @@
 </div>
 
 <script>
-var SUPABASE_URL = localStorage.getItem('supabase_url') || '';
-var SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || '';
+var SUPABASE_URL = 'https://rspilvkxtopjlfjphszg.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzcGlsdmt4dG9wamxmanBoc3pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIxNjk3NzAsImV4cCI6MjA2Nzc0NTc3MH0.3nA1gARc5iEltXgbgQkIXx4a7y5MUTjByNQ_1YpI4kI';
 var _supabase = null;
 var _currentUser = null;
 var _syncing = false;
 
 function getSupabase() {
   if (_supabase) return _supabase;
-  var url = SUPABASE_URL || prompt('请输入 Supabase URL：');
-  var key = SUPABASE_ANON_KEY || prompt('请输入 Supabase Anon Key：');
-  if (url && key) {
-    _supabase = (window.supabase||{}).createClient ? window.supabase.createClient(url, key) : null;
-    localStorage.setItem('supabase_url', url);
-    localStorage.setItem('supabase_anon_key', key);
+  try {
+    _supabase = (window.supabase||{}).createClient ? window.supabase.createClient(
+      "https://rspilvkxtopjlfjphszg.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzcGlsdmt4dG9wamxmanBoc3pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIxNjk3NzAsImV4cCI6MjA2Nzc0NTc3MH0.3nA1gARc5iEltXgbgQkIXx4a7y5MUTjByNQ_1YpI4kI"
+    ) : null;
     return _supabase;
-  }
+  } catch(e) { return null; }
+}
   return null;
 }
 
