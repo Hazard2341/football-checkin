@@ -290,14 +290,14 @@ function saveData(d) {
 
 // ===== Auth =====
 async function login() {
+  document.getElementById("loginError").style.display = "none";
   var n = document.getElementById("loginEmail").value.trim();
   var p = document.getElementById("loginPassword").value.trim();
-  var e = document.getElementById("loginError");
-  if (!n || !p) { e.style.display = "block"; e.innerText = "请填写昵称和密码"; return; }
-  if (p.length < 6) { e.style.display = "block"; e.innerText = "密码至少6位"; return; }
-  e.style.display = "none";
+  if (!n || !p) { document.getElementById("loginError").innerText = "请填写昵称和密码"; document.getElementById("loginError").style.display = "block"; return; }
   _currentUser = {id: "u_" + n, email: n, token: n};
   localStorage.setItem("sb_user", JSON.stringify(_currentUser));
+  document.getElementById("loginBtn").disabled = false;
+  document.getElementById("loginBtn").innerText = "登录";
   showApp();
 }
 function skipLogin() { showApp(); }
@@ -537,6 +537,7 @@ window.onload=function(){var s=localStorage.getItem("sb_user");if(s){try{_curren
 </script>
 </body>
 </html>
+
 
 
 
