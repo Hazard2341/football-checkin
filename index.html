@@ -157,6 +157,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <div class="header-actions">
     <button class="action-btn" onclick="exportData()">🗑️ 导出</button>
     <button class="action-btn" onclick="document.getElementById('importInput').click()">📌 导入</button>
+    <button class="action-btn" onclick="resetWeek()" style="color:#ff6b35">🔄 重置本周</button>
     <input type="file" id="importInput" accept=".json" style="display:none" onchange="importData(event)">
   </div>
   <div class="date-display" id="dateDisplay"></div>
