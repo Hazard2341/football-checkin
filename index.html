@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -137,8 +137,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="error" id="loginError"></div>
     <input type="email" id="loginEmail" placeholder="邮箱" autocomplete="email">
     <input type="password" id="loginPassword" placeholder="密码 (6位以上)" autocomplete="current-password">
-    <button class="btn-primary" id="loginBtn" onclick="login()">登录 / 注册</button>
-    <div class="divider">注册后自动登录，数据云端同步</div>
+    <button class="btn-primary" id="loginBtn" onclick="login()">登录</button>
+    <div class="divider">输入昵称+密码，数据自动同步</div>
     <button class="btn-ghost" onclick="skipLogin()">先看看 🌟</button>
   </div>
 </div>
@@ -237,54 +237,29 @@ function getSupabase() {
 }
 
 async function supabaseSignIn(email, password) {
-  var sb = getSupabase();
-  if (!sb) return {error: {message: "No Supabase config"}};
-  try {
-    var resp = await fetch(sb.url + "/auth/v1/token?grant_type=password", {
-      method: "POST",
-      headers: {"apikey": sb.key, "Content-Type": "application/json"},
-      body: JSON.stringify({email: email, password: password})
-    });
-    var data = await resp.json();
-    if (data.access_token) {
-      _currentUser = {id: data.user.id, email: data.user.email, token: data.access_token};
-      localStorage.setItem("sb_user", JSON.stringify(_currentUser));
-      return {data: data, error: null};
-    }
-    var resp2 = await fetch(sb.url + "/auth/v1/signup", {
-      method: "POST",
-      headers: {"apikey": sb.key, "Content-Type": "application/json"},
-      body: JSON.stringify({email: email, password: password})
-    });
-    var data2 = await resp2.json();
-    if (data2.id) {
-      _currentUser = {id: data2.id, email: email, token: null};
-      localStorage.setItem("sb_user", JSON.stringify(_currentUser));
-      return {data: data2, error: null};
-    }
-    return {data: null, error: data2};
-  } catch(e) {
-    return {error: {message: e.message}};
-  }
+  // Use email as username, generate local userId (skip Supabase email auth)
+  var uid = "u_" + btoa(email).replace(/[=]/g,'');
+  return {data: {user: {id: uid, email: email}}, error: null};
 }
 
 async function loadCloudData() {
-  var sb = getSupabase(); if (!sb || !_currentUser) return null;
+  if (!_currentUser) return null;
   try {
-    var resp = await fetch(sb.url + "/rest/v1/checkins?id=eq." + _currentUser.id, {headers: sb.headers()});
+    var resp = await fetch("https://zskhfoognaolccysvkgc.supabase.co/rest/v1/checkins?id=eq." + _currentUser.id + "&limit=1", {
+      headers: {"apikey": "sb_publishable_n2DUeMtq6tmvygpAwqOY5w_ZHUwMBnC"}
+    });
     var d = await resp.json();
     return d && d[0] && d[0].data ? d[0].data : null;
   } catch(e) { return null; }
 }
 
 async function saveCloudData(dataObj) {
-  if (_syncing) return;
+  if (_syncing || !_currentUser) return;
   _syncing = true;
-  var sb = getSupabase(); if (!sb || !_currentUser) { _syncing = false; return; }
   try {
-    await fetch(sb.url + "/rest/v1/checkins", {
+    await fetch("https://zskhfoognaolccysvkgc.supabase.co/rest/v1/checkins", {
       method: "POST",
-      headers: sb.headers(),
+      headers: {"apikey": "sb_publishable_n2DUeMtq6tmvygpAwqOY5w_ZHUwMBnC", "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates"},
       body: JSON.stringify({id: _currentUser.id, data: dataObj, updated_at: new Date().toISOString()})
     });
   } catch(e) {}
@@ -318,38 +293,40 @@ async function login() {
   var email = document.getElementById("loginEmail").value.trim();
   var pw = document.getElementById("loginPassword").value.trim();
   var errEl = document.getElementById("loginError");
-  if (!email || !pw) { errEl.style.display = "block"; errEl.innerText = "请填写邮箱和密码"; return; }
+  if (!email || !pw) { errEl.style.display = "block"; errEl.innerText = "请填写昵称和密码"; return; }
   if (pw.length < 6) { errEl.style.display = "block"; errEl.innerText = "密码至少6位"; return; }
   errEl.style.display = "none";
   document.getElementById("loginBtn").disabled = true;
-  document.getElementById("loginBtn").innerText = "正在登录...";
+  document.getElementById("loginBtn").innerText = "登录中...";
+  var uid = "u_" + btoa(email).replace(/[=]/g,'');
+  _currentUser = {id: uid, email: email, token: uid};
+  localStorage.setItem("sb_user", JSON.stringify(_currentUser));
+  // Load cloud data directly
   try {
-    var result = await supabaseSignIn(email, pw);
-    if (result.error) {
-      errEl.style.display = "block"; errEl.innerText = result.error.message || "登录失败";
-      document.getElementById("loginBtn").disabled = false;
-      document.getElementById("loginBtn").innerText = "登录 / 注册";
-      return;
-    }
-    var cloudData = await loadCloudData();
-    if (cloudData) {
-      _currentUser.cloudData = cloudData;
-      var merged = {};
-      for(var k in cloudData) merged[k] = cloudData[k];
-      var local = getLocalData();
-      for(var k in local) if(!merged[k]) merged[k] = local[k];
+    var resp = await fetch("https://zskhfoognaolccysvkgc.supabase.co/rest/v1/checkins?id=eq." + uid + "&limit=1", {
+      headers: {"apikey": "sb_publishable_n2DUeMtq6tmvygpAwqOY5w_ZHUwMBnC"}
+    });
+    var d = await resp.json();
+    if (d && d[0] && d[0].data) {
+      _currentUser.cloudData = d[0].data;
+      var merged = {}; for(var k in d[0].data) merged[k] = d[0].data[k];
+      var local = getLocalData(); for(var k in local) if(!merged[k]) merged[k] = local[k];
       saveLocalData(merged);
     } else {
       var local = getLocalData();
-      if (Object.keys(local).length > 0) await saveCloudData(local);
+      if (Object.keys(local).length > 0) {
+        await fetch("https://zskhfoognaolccysvkgc.supabase.co/rest/v1/checkins", {
+          method: "POST",
+          headers: {"apikey": "sb_publishable_n2DUeMtq6tmvygpAwqOY5w_ZHUwMBnC", "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates"},
+          body: JSON.stringify({id: uid, data: local})
+        });
+      }
       _currentUser.cloudData = local;
     }
-    showApp();
-  } catch(e) {
-    errEl.style.display = "block"; errEl.innerText = "网络错误";
-    document.getElementById("loginBtn").disabled = false;
-    document.getElementById("loginBtn").innerText = "登录 / 注册";
-  }
+  } catch(e) {}
+  document.getElementById("loginBtn").disabled = false;
+  document.getElementById("loginBtn").innerText = "登录 / 注册";
+  showApp();
 }
 
 function skipLogin() { showApp(); }
@@ -591,6 +568,7 @@ window.onload=function(){var s=localStorage.getItem("sb_user");if(s){try{_curren
 </script>
 </body>
 </html>
+
 
 
 
