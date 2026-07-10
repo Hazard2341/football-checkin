@@ -238,7 +238,7 @@ function getSupabase() {
 
 async function supabaseSignIn(email, password) {
   // Use email as username, generate local userId (skip Supabase email auth)
-  var uid = "u_" + btoa(email).replace(/[=]/g,'');
+  var uid = "u_" + encodeURIComponent(email).replace(/%/g,'');
   return {data: {user: {id: uid, email: email}}, error: null};
 }
 
@@ -298,7 +298,7 @@ async function login() {
   errEl.style.display = "none";
   document.getElementById("loginBtn").disabled = true;
   document.getElementById("loginBtn").innerText = "登录中...";
-  var uid = "u_" + btoa(email).replace(/[=]/g,'');
+  var uid = "u_" + encodeURIComponent(email).replace(/%/g,'');
   _currentUser = {id: uid, email: email, token: uid};
   localStorage.setItem("sb_user", JSON.stringify(_currentUser));
   // Load cloud data directly
@@ -568,6 +568,7 @@ window.onload=function(){var s=localStorage.getItem("sb_user");if(s){try{_curren
 </script>
 </body>
 </html>
+
 
 
 
