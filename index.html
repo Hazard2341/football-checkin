@@ -290,8 +290,12 @@ function saveData(d) {
 
 // ===== Auth =====
 function login() {
-  document.getElementById("loginError").style.display = "none";
-  _currentUser = {id: "u_" + Date.now(), email: "user", token: "token"};
+  var n = document.getElementById("loginEmail").value.trim();
+  var p = document.getElementById("loginPassword").value.trim();
+  var el = document.getElementById("loginError");
+  if (!n || !p) { el.style.display = "block"; el.innerText = "请填写昵称和密码"; return; }
+  el.style.display = "none";
+  _currentUser = {id: "u_" + n, email: n, token: n};
   localStorage.setItem("sb_user", JSON.stringify(_currentUser));
   showApp();
 }function skipLogin() { showApp(); }
@@ -541,6 +545,7 @@ window.onload=function(){var s=localStorage.getItem("sb_user");if(s){try{_curren
 </script>
 </body>
 </html>
+
 
 
 
