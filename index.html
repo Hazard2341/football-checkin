@@ -529,8 +529,359 @@ function closeTut(){document.getElementById("tutOverlay").classList.remove("show
 window.onload=function(){var s=localStorage.getItem("sb_user");if(s){try{_currentUser=JSON.parse(s)}catch(e){}}}
 
 </script>
+
+<!-- ===== 底部导航 ===== -->
+<div class="bottom-nav" id="bottomNav">
+  <div class="nav-item nav-active" onclick="switchTab('checkin')" id="navCheckin">
+    <span>🏠</span>
+    <span class="nav-label">打卡</span>
+  </div>
+  <div class="nav-item" onclick="switchTab('exercises')" id="navExercises">
+    <span>🏋️</span>
+    <span class="nav-label">动作库</span>
+  </div>
+  <div class="nav-item" onclick="switchTab('fields')" id="navFields">
+    <span>⚽</span>
+    <span class="nav-label">球场</span>
+  </div>
+  <div class="nav-item" onclick="switchTab('mine')" id="navMine">
+    <span>👤</span>
+    <span class="nav-label">我的</span>
+  </div>
+</div>
+
+<!-- ===== 动作库板块 ===== -->
+<div class="tab-content" id="tabExercises" style="display:none">
+  <div class="ex-header">
+    <h1>🏋️ 动作教学库</h1>
+  </div>
+  <div class="ex-search"><input placeholder="搜索动作..." oninput="exSearch(this.value)" /></div>
+  <div class="ex-cats" id="exCats"></div>
+  <div class="ex-list" id="exList"></div>
+</div>
+
+<!-- ===== 附近球场板块 ===== -->
+<div class="tab-content" id="tabFields" style="display:none">
+  <div class="ex-header">
+    <h1>⚽ 附近球场</h1>
+  </div>
+  <div class="field-loc-bar">
+    <span id="locText">📍 点击定位获取附近球场</span>
+    <button class="loc-btn" onclick="getLocation()">定位</button>
+  </div>
+  <div class="field-list" id="fieldList"></div>
+</div>
+
+<!-- ===== 我的板块 ===== -->
+<div class="tab-content" id="tabMine" style="display:none">
+  <div class="ex-header">
+    <h1>👤 我的</h1>
+  </div>
+  <div class="mine-card">
+    <div class="mine-user">
+      <div class="mine-avatar" id="mineAvatar">?</div>
+      <div><div class="mine-name" id="mineName">用户</div><div class="mine-email" id="mineEmail">加载中...</div></div>
+    </div>
+  </div>
+  <div class="mine-card">
+    <div class="mine-stat"><span>🔥 连续打卡</span><span class="mine-num" id="mStreak">0天</span></div>
+    <div class="mine-stat"><span>📅 总天数</span><span class="mine-num" id="mTotal">0天</span></div>
+    <div class="mine-stat"><span>⭐ 本周进度</span><span class="mine-num" id="mWeek">0/7</span></div>
+  </div>
+  <div class="mine-card">
+    <div class="mine-menu" onclick="resetWeek()">🔄 重置本周进度</div>
+    <div class="mine-menu" onclick="exportData()">📤 导出数据</div>
+    <div class="mine-menu" onclick="importData()">📥 导入数据</div>
+  </div>
+  <button class="mine-logout" onclick="doLogout()">退出登录</button>
+</div>
+
+<!-- ===== 动作详情弹窗 ===== -->
+<div class="modal-overlay" id="exModal" onclick="closeExModal()">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <div class="modal-ico" id="modalIco">⚽</div>
+    <div class="modal-name" id="modalName">动作名称</div>
+    <div class="modal-desc" id="modalDesc">动作描述</div>
+    <div class="modal-tags" id="modalTags"></div>
+    <div class="modal-steps" id="modalSteps"></div>
+    <button class="modal-close" onclick="closeExModal()">关闭</button>
+  </div>
+</div>
+
+<style>
+/* ===== 底部导航 ===== */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(10,22,40,0.95);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-around;padding:6px 0 env(safe-area-inset-bottom,6px)}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 12px;cursor:pointer;font-size:20px;color:rgba(255,255,255,0.4);transition:all 0.15s;border-radius:12px}
+.nav-item.nav-active{color:#1976d2}
+.nav-item.nav-active .nav-label{color:#1976d2;font-weight:700}
+.nav-label{font-size:10px;color:rgba(255,255,255,0.4)}
+
+/* ===== Tab 内容 ===== */
+.tab-content{padding-bottom:70px;display:none}
+.tab-content:first-of-type{display:block}
+
+/* ===== 动作库 ===== */
+.ex-header{padding:12px 16px 8px;background:rgba(10,22,40,0.95);border-bottom:1px solid rgba(255,255,255,0.06);position:sticky;top:0;z-index:10}
+.ex-header h1{font-size:20px;font-weight:900;background:linear-gradient(90deg,#fff,#90caf9);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.ex-search{padding:10px 16px}
+.ex-search input{width:100%;padding:10px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:#fff;font-size:14px;outline:none;box-sizing:border-box}
+.ex-search input::placeholder{color:rgba(255,255,255,0.3)}
+.ex-cats{display:flex;gap:6px;padding:0 16px 10px;overflow-x:auto}
+.ex-cat{padding:4px 14px;border-radius:20px;font-size:12px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.6);cursor:pointer;white-space:nowrap}
+.ex-cat.ex-cat-active{background:linear-gradient(135deg,#1565c0,#1976d2);color:#fff;font-weight:700}
+.ex-list{padding:0 16px}
+.ex-card{display:flex;background:rgba(255,255,255,0.04);border-radius:16px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all 0.15s}
+.ex-card:active{transform:scale(0.98);background:rgba(255,255,255,0.08)}
+.ex-ico{width:70px;height:70px;border-radius:12px;background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;font-size:36px;margin-right:14px;flex-shrink:0}
+.ex-info{flex:1}
+.ex-name{font-size:15px;font-weight:700;color:#fff;display:block;margin-bottom:4px}
+.ex-desc{font-size:12px;color:rgba(255,255,255,0.5);display:block;margin-bottom:4px}
+.ex-tag{font-size:11px;color:#90caf9}
+
+/* ===== 弹窗 ===== */
+.modal-overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal-content{background:rgba(20,35,60,0.98);backdrop-filter:blur(20px);border-radius:24px;border:1px solid rgba(255,255,255,0.1);padding:28px;width:100%;max-width:400px;max-height:80vh;overflow-y:auto}
+.modal-ico{font-size:64px;text-align:center;margin-bottom:8px}
+.modal-name{font-size:20px;font-weight:800;color:#fff;text-align:center}
+.modal-desc{font-size:13px;color:rgba(255,255,255,0.5);text-align:center;margin:8px 0 16px}
+.modal-tags{display:flex;gap:8px;justify-content:center;margin-bottom:16px}
+.modal-tag{padding:4px 12px;border-radius:12px;font-size:12px;background:rgba(25,118,210,0.15);color:#90caf9}
+.modal-steps-title{font-size:15px;font-weight:700;color:#90caf9;margin-bottom:10px;display:block}
+.modal-step{display:block;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:13px;color:#e0e0e0}
+.modal-close{width:100%;padding:10px;border:none;border-radius:12px;background:linear-gradient(135deg,#1565c0,#1976d2);color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-top:16px}
+
+/* ===== 球场 ===== */
+.field-loc-bar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:rgba(255,255,255,0.03)}
+#locText{flex:1;font-size:13px;color:rgba(255,255,255,0.6)}
+.loc-btn{padding:6px 16px;border:none;border-radius:20px;background:linear-gradient(135deg,#1565c0,#1976d2);color:#fff;font-size:12px;cursor:pointer}
+.field-list{padding:0 16px}
+.field-card{background:rgba(255,255,255,0.04);border-radius:16px;padding:16px;margin-bottom:10px}
+.field-top{display:flex;justify-content:space-between;align-items:center}
+.field-name{font-size:16px;font-weight:700;color:#fff}
+.field-dist{font-size:12px;color:#90caf9}
+.field-addr{font-size:12px;color:rgba(255,255,255,0.4);display:block;margin:6px 0}
+.field-tags{display:flex;gap:6px;margin:8px 0}
+.field-tag{padding:2px 10px;border-radius:10px;font-size:11px;background:rgba(25,118,210,0.1);color:#90caf9}
+.field-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.field-price{font-size:16px;font-weight:700;color:#4ade80}
+.field-actions{display:flex;gap:8px}
+.field-btn{padding:6px 14px;border:none;border-radius:10px;font-size:12px;cursor:pointer}
+.field-btn-call{background:rgba(255,255,255,0.06);color:#e0e0e0}
+.field-btn-nav{background:rgba(25,118,210,0.2);color:#90caf9}
+
+/* ===== 我的 ===== */
+.mine-card{background:rgba(255,255,255,0.04);border-radius:16px;margin:0 16px 10px;padding:16px}
+.mine-user{display:flex;align-items:center;gap:12px}
+.mine-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#1565c0,#1976d2);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff}
+.mine-name{font-size:16px;font-weight:700;color:#fff}
+.mine-email{font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px}
+.mine-stat{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:14px;color:#e0e0e0}
+.mine-stat:last-child{border-bottom:none}
+.mine-num{font-size:18px;font-weight:800;color:#fff}
+.mine-menu{padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:14px;color:#e0e0e0;cursor:pointer}
+.mine-menu:last-child{border-bottom:none}
+.mine-logout{width:calc(100% - 32px);margin:10px 16px 0;padding:12px;border:none;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#ff5252;font-size:15px;font-weight:600;cursor:pointer}
+</style>
+
+<script>
+// ===== 底部导航切换 =====
+var currentTab = 'checkin';
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(function(el) { el.style.display = 'none'; });
+  var map = { checkin: 'tabExercises', exercises: 'tabExercises', fields: 'tabFields', mine: 'tabMine' };
+  var contentId = map[tab] || 'tabExercises';
+  var el = document.getElementById(contentId);
+  if (el) el.style.display = 'block';
+  
+  // 打卡页面特殊处理（原来页面）
+  var mainContent = document.querySelector('.main-content');
+  if (mainContent) mainContent.style.display = tab === 'checkin' ? 'block' : 'none';
+  
+  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('nav-active'); });
+  var navMap = { checkin: 'navCheckin', exercises: 'navExercises', fields: 'navFields', mine: 'navMine' };
+  var navEl = document.getElementById(navMap[tab]);
+  if (navEl) navEl.classList.add('nav-active');
+  
+  currentTab = tab;
+  if (tab === 'exercises') renderExercises();
+  if (tab === 'fields') renderFields();
+  if (tab === 'mine') renderMine();
+}
+
+// ===== 动作库数据 =====
+var EX_DATA = [
+  {ico:"⚡",name:"正脚背抽射",desc:"远距离大力射门",cat:"射门",diff:"★★☆",detail:"支撑脚指向目标方向，脚背绷直，膝盖对准球，摆腿发力击球中部，随球动作完整跟进"},
+  {ico:"🌀",name:"内脚背弧线球",desc:"绕过防守队员的弧线射门",cat:"射门",diff:"★★★",detail:"支撑脚指向目标偏左，用脚内侧击球底部偏右，随球动作向右上方摆动，球会产生弧线绕过防守"},
+  {ico:"💥",name:"外脚背弹射",desc:"出其不意的快速射门",cat:"射门",diff:"★★★",detail:"支撑脚站稳，脚踝锁定用外脚背击球，发力短促干脆，球路会产生外旋"},
+  {ico:"🦵",name:"凌空抽射",desc:"不等球落地直接射门",cat:"射门",diff:"★★★★",detail:"判断落点调整步点，身体稍后仰，脚背绷直等待球下落至膝高时，腰腹发力带动摆腿抽射"},
+  {ico:"📤",name:"脚内侧推传",desc:"最基础最准确的传球",cat:"传球",diff:"★☆☆",detail:"支撑脚指向目标，脚内侧打开90度，推击球中部，动作简洁不拖沓"},
+  {ico:"↗️",name:"外脚背传球",desc:"快速出球适合边路转移",cat:"传球",diff:"★★☆",detail:"支撑脚站稳，脚踝内扣用外脚背触球，发力短促，球速快线路平直"},
+  {ico:"📡",name:"长传转移",desc:"改变进攻方向的关键技术",cat:"传球",diff:"★★★",detail:"支撑脚站位稍远，用脚内侧大力击球底部，随球动作高而长，球产生高弧度远距离飞行"},
+  {ico:"🎯",name:"直塞球",desc:"穿透防线送出身后球",cat:"传球",diff:"★★★",detail:"观察队友跑位时机，脚内侧推击球中下部，力度控制要精准，球速快穿越防线"},
+  {ico:"🔄",name:"V字推拉",desc:"原地控球基础动作",cat:"盘带",diff:"★☆☆",detail:"用脚底将球向后拉，迅速用同一只脚向前推，左右脚交替进行，保持低重心和节奏"},
+  {ico:"🚲",name:"踩单车",desc:"晃开防守队员重心",cat:"盘带",diff:"★★★",detail:"身体重心下沉，一只脚从球上方绕过，迅速换另一只脚绕过，向反方向加速突破"},
+  {ico:"💫",name:"马赛回旋",desc:"优雅的转身过人",cat:"盘带",diff:"★★★★",detail:"用一只脚踩球向后拉，身体同时旋转180度，另一只脚接球向前，动作要连贯流畅"},
+  {ico:"🐂",name:"牛尾巴过人",desc:"快速变向突破",cat:"盘带",diff:"★★★★",detail:"用脚外侧向一侧拨球，迅速切换脚内侧扣向另一侧，身体重心随之快速变向，加速摆脱防守"},
+  {ico:"🛡️",name:"正面铲球",desc:"最后防线防守动作",cat:"防守",diff:"★★☆",detail:"降低重心接近对手，最后一步跨大，滑出用脚将球捅走，注意安全避免受伤"},
+  {ico:"🪖",name:"头球解围",desc:"高空球防守",cat:"防守",diff:"★★☆",detail:"判断落点提前移动，眼睛盯住球，用前额发力顶球，向两侧或前方解围"},
+  {ico:"🧱",name:"卡位防守",desc:"用身体挡住进攻队员",cat:"防守",diff:"★★☆",detail:"用身体隔开对手和球，屈膝降低重心，手臂适度张开保持平衡，不轻易出脚"},
+  {ico:"🎯",name:"头球攻门",desc:"角球和传中终结方式",cat:"头球",diff:"★★★",detail:"判断传中落点，起跳时机要准，腰腹发力带动颈部，用前额顶向球门方向"},
+  {ico:"🏃",name:"冲刺跑",desc:"提升爆发力基础训练",cat:"体能",diff:"★☆☆",detail:"起跑姿势低重心，前几步短促有力，摆臂配合步伐，逐渐抬头看前方"},
+  {ico:"↩️",name:"折返跑",desc:"模拟比赛反复冲刺",cat:"体能",diff:"★★☆",detail:"从起点全力冲刺，到达标志点急停，转身再冲刺返回，注意急停时重心控制"},
+  {ico:"🧤",name:"侧扑",desc:"守门员基础扑救动作",cat:"守门",diff:"★★★",detail:"快速横移步调整，向侧方蹬地发力，身体伸展手臂张开，手型呈W型接球"},
+  {ico:"🥅",name:"接地滚球",desc:"守门员基本功",cat:"守门",diff:"★☆☆",detail:"膝盖微屈降低重心，双手掌心向前，迎球方向身体正对，触球瞬间缓冲回收"}
+];
+
+var EX_CATS = ['全部','射门','传球','盘带','防守','头球','体能','守门'];
+var exCatIdx = 0;
+var exKw = '';
+
+function renderExercises() {
+  renderExCats();
+  renderExList();
+}
+
+function renderExCats() {
+  var html = '';
+  for (var i = 0; i < EX_CATS.length; i++) {
+    html += '<span class="ex-cat' + (i === exCatIdx ? ' ex-cat-active' : '') + '" onclick="selectExCat(' + i + ')">' + EX_CATS[i] + '</span>';
+  }
+  document.getElementById('exCats').innerHTML = html;
+}
+
+function selectExCat(i) { exCatIdx = i; renderExCats(); renderExList(); }
+
+function exSearch(val) { exKw = val; renderExList(); }
+
+function renderExList() {
+  var arr = EX_DATA.slice();
+  if (exCatIdx > 0) arr = arr.filter(function(x) { return x.cat === EX_CATS[exCatIdx]; });
+  if (exKw) arr = arr.filter(function(x) { return x.name.indexOf(exKw) >= 0 || x.desc.indexOf(exKw) >= 0; });
+  var html = '';
+  for (var i = 0; i < arr.length; i++) {
+    html += '<div class="ex-card" onclick="showExDetail(' + EX_DATA.indexOf(arr[i]) + ')">' +
+      '<div class="ex-ico">' + arr[i].ico + '</div>' +
+      '<div class="ex-info"><span class="ex-name">' + arr[i].name + '</span><span class="ex-desc">' + arr[i].desc + '</span><span class="ex-tag">' + arr[i].cat + ' · ' + arr[i].diff + '</span></div>' +
+      '</div>';
+  }
+  if (!html) html = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3)">没有找到匹配的动作</div>';
+  document.getElementById('exList').innerHTML = html;
+}
+
+function showExDetail(idx) {
+  var item = EX_DATA[idx];
+  if (!item) return;
+  document.getElementById('modalIco').textContent = item.ico;
+  document.getElementById('modalName').textContent = item.name;
+  document.getElementById('modalDesc').textContent = item.desc;
+  document.getElementById('modalTags').innerHTML = '<span class="modal-tag">🏷️ ' + item.cat + '</span><span class="modal-tag">📊 ' + item.diff + '</span>';
+  var steps = item.detail.split('，');
+  var stepsHtml = '<span class="modal-steps-title">📝 步骤要领</span>';
+  for (var i = 0; i < steps.length; i++) {
+    stepsHtml += '<span class="modal-step">' + (i+1) + '. ' + steps[i].trim() + '</span>';
+  }
+  document.getElementById('modalSteps').innerHTML = stepsHtml;
+  document.getElementById('exModal').classList.add('show');
+}
+
+function closeExModal() { document.getElementById('exModal').classList.remove('show'); }
+
+// ===== 球场数据 =====
+var FIELDS_DATA = [
+  {name:"成华足球公园",addr:"成都市成华区建设北路三段",dist:"约1.2km",price:"¥80/小时",phone:"13800138001",lat:30.665,lng:104.105,tags:["五人制","七人制","灯光"]},
+  {name:"东郊记忆足球场",addr:"成都市成华区东郊记忆内",dist:"约2.5km",price:"¥100/小时",phone:"13800138002",lat:30.67,lng:104.115,tags:["十一人制","草皮好","停车方便"]},
+  {name:"电子科大沙河校区",addr:"成都市成华区建设北路二段",dist:"约0.8km",price:"¥60/小时",phone:"13800138003",lat:30.66,lng:104.098,tags:["五人制","便宜","校园"]},
+  {name:"成华区体育中心",addr:"成都市成华区双林路",dist:"约3km",price:"¥120/小时",phone:"13800138004",lat:30.655,lng:104.092,tags:["十一人制","标准场","淋浴"]},
+  {name:"新华公园足球场",addr:"成都市成华区双林路87号",dist:"约2.8km",price:"¥70/小时",phone:"13800138005",lat:30.657,lng:104.095,tags:["五人制","七人制"]}
+];
+
+function renderFields() {
+  var html = '';
+  for (var i = 0; i < FIELDS_DATA.length; i++) {
+    var f = FIELDS_DATA[i];
+    var tagsHtml = '';
+    for (var j = 0; j < f.tags.length; j++) tagsHtml += '<span class="field-tag">' + f.tags[j] + '</span>';
+    html += '<div class="field-card">' +
+      '<div class="field-top"><span class="field-name">' + f.name + '</span><span class="field-dist">' + f.dist + '</span></div>' +
+      '<span class="field-addr">' + f.addr + '</span>' +
+      '<div class="field-tags">' + tagsHtml + '</div>' +
+      '<div class="field-bottom"><span class="field-price">' + f.price + '</span>' +
+      '<div class="field-actions"><button class="field-btn field-btn-call" onclick="callField(\'' + f.phone + '\')">📞 联系</button>' +
+      '<button class="field-btn field-btn-nav" onclick="navField(' + f.lat + ',' + f.lng + ')">🗺️ 导航</button></div></div></div>';
+  }
+  document.getElementById('fieldList').innerHTML = html;
+  document.getElementById('locText').textContent = '📍 成都成华区（模拟数据）';
+}
+
+function getLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(pos) {
+      document.getElementById('locText').textContent = '📍 ' + pos.coords.latitude.toFixed(4) + ', ' + pos.coords.longitude.toFixed(4);
+    }, function() {
+      document.getElementById('locText').textContent = '📍 定位失败，显示模拟数据';
+    });
+  } else {
+    document.getElementById('locText').textContent = '📍 浏览器不支持定位，显示模拟数据';
+  }
+}
+
+function callField(phone) { window.location.href = 'tel:' + phone; }
+function navField(lat, lng) {
+  window.open('https://apis.map.qq.com/uri/v1/marker?marker=coord:' + lat + ',' + lng + '&title=球场');
+}
+
+// ===== 我的页面 =====
+function renderMine() {
+  var userStr = localStorage.getItem('_currentUser') || localStorage.getItem('sb_user');
+  if (userStr) {
+    try {
+      var u = JSON.parse(userStr);
+      document.getElementById('mineName').textContent = u.email ? u.email.split('@')[0] : '游客';
+      document.getElementById('mineEmail').textContent = u.email || '离线模式';
+      document.getElementById('mineAvatar').textContent = u.email ? u.email[0].toUpperCase() : '游';
+    } catch(e) {}
+  }
+  var data = getData();
+  var today = new Date();
+  var todayKey = today.getFullYear() + '-' + (today.getMonth()+1) + '-' + today.getDate();
+  var streak = data[todayKey] ? 1 : 0;
+  var d = new Date();
+  if (streak) { for (var i = 1; i < 365; i++) { d.setDate(d.getDate()-1); var k = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); if (data[k]) streak++; else break; } }
+  var total = Object.keys(data).filter(function(k) { return data[k]; }).length;
+  var weekCount = 0;
+  var now = new Date();
+  for (var i = 0; i < 7; i++) { var w = new Date(now); w.setDate(now.getDate()-now.getDay()+i+1); var wk = w.getFullYear()+'-'+(w.getMonth()+1)+'-'+w.getDate(); if (data[wk]) weekCount++; }
+  document.getElementById('mStreak').textContent = streak + '天';
+  document.getElementById('mTotal').textContent = total + '天';
+  document.getElementById('mWeek').textContent = weekCount + '/7';
+}
+
+function exportData() {
+  var data = JSON.stringify(getData());
+  var ta = document.createElement('textarea');
+  ta.value = data; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+  showNotif('数据已复制到剪贴板');
+}
+
+function importData() {
+  var d = prompt('请粘贴JSON格式的打卡数据：');
+  if (d) { try { var parsed = JSON.parse(d); saveData(parsed); renderMine(); showNotif('导入成功'); } catch(e) { alert('数据格式错误'); } }
+}
+
+function doLogout() {
+  if (confirm('确定要退出登录吗？')) {
+    localStorage.removeItem('_currentUser');
+    localStorage.removeItem('sb_user');
+    location.reload();
+  }
+}
+</script>
+
 </body>
 </html>
+
 
 
 
