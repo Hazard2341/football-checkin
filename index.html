@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -592,8 +592,21 @@ function importData(e){var f=e.target.files[0];if(!f)return;var r=new FileReader
     <div class="mine-menu" onclick="resetWeek()">🔄 重置本周进度</div>
     <div class="mine-menu" onclick="exportData()">📤 导出数据</div>
     <div class="mine-menu" onclick="importData()">📥 导入数据</div>
+<div class="mine-menu" onclick="showDonate()">❤️ 打赏支持</div>
   </div>
   <button class="mine-logout" onclick="doLogout()">退出登录</button>
+</div>
+
+<!-- ===== 打赏弹窗 ===== -->
+<div class="modal-overlay" id="donateModal" onclick="closeDonate()">
+<div class="modal-content donate-content" onclick="event.stopPropagation()">
+<div class="modal-ico">❤️</div>
+<div class="modal-name">感谢支持！</div>
+<div class="modal-desc">如果这个工具对你有帮助，欢迎打赏支持一下 ❤️</div>
+<img src="images/qrcode.jpg" alt="收款码" class="donate-qr" id="qrImg" onerror="this.style.display='none';document.getElementById('qrFb').style.display='flex'"><div id="qrFb" style="display:none;width:200px;height:200px;border-radius:16px;margin:16px auto;background:rgba(255,255,255,0.04);align-items:center;justify-content:center;flex-direction:column;border:2px dashed rgba(255,255,255,0.1)"><span style="font-size:40px">📱</span><span style="font-size:12px;color:rgba(255,255,255,0.3);margin-top:8px;text-align:center">请将收款码放入<br>images/qrcode.jpg</span></div>
+<div class="donate-tip">微信扫码 · 感谢你的支持 🙏</div>
+<button class="modal-close" onclick="closeDonate()">关闭</button>
+</div>
 </div>
 
 <!-- ===== 动作详情弹窗 ===== -->
@@ -649,6 +662,9 @@ function importData(e){var f=e.target.files[0];if(!f)return;var r=new FileReader
 .modal-tag{padding:4px 12px;border-radius:12px;font-size:12px;background:rgba(25,118,210,0.15);color:#90caf9}
 .modal-steps-title{font-size:15px;font-weight:700;color:#90caf9;margin-bottom:10px;display:block}
 .modal-step{display:block;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:13px;color:#e0e0e0}
+.donate-content{max-width:320px;text-align:center}
+.donate-qr{width:200px;height:200px;border-radius:16px;margin:16px auto;display:block;object-fit:cover;border:2px solid rgba(255,255,255,0.1)}
+.donate-tip{font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:8px}
 .modal-close{width:100%;padding:10px;border:none;border-radius:12px;background:linear-gradient(135deg,#1565c0,#1976d2);color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-top:16px}
 
 /* ===== 球场 ===== */
@@ -959,6 +975,9 @@ function importData() {
   var d = prompt('请粘贴JSON格式的打卡数据：');
   if (d) { try { var parsed = JSON.parse(d); saveData(parsed); renderMine(); showNotif('导入成功'); } catch(e) { alert('数据格式错误'); } }
 }
+
+function showDonate(){document.getElementById("donateModal").classList.add("show")}
+function closeDonate(){document.getElementById("donateModal").classList.remove("show")}
 
 function doLogout() {
   if (confirm('确定要退出登录吗？')) {
