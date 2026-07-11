@@ -1,4 +1,4 @@
-﻿﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -97,6 +97,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .checkin-btn{width:100%;padding:14px;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;transition:all 0.15s;margin-top:12px;background:linear-gradient(135deg,#1565c0,#1976d2);color:#fff;box-shadow:0 4px 16px rgba(21,101,192,0.25)}
 .checkin-btn:active{transform:scale(0.97)}
 .checkin-btn.hidden{display:none}
+.checkin-btn.cancel{background:linear-gradient(135deg,#e65100,#ff6d00)}
+.checkin-btn.cancel{background:linear-gradient(135deg,#e65100,#ff6d00)}
 
 .overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:20px}
 .overlay.show{display:flex}
@@ -138,7 +140,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="error" id="loginError"></div>
     <input type="text" id="loginEmail" placeholder="邮箱" autocomplete="email">
     <input type="password" id="loginPassword" placeholder="密码" autocomplete="current-password">
-    <button class="btn-primary" id="loginBtn" type="button" onclick="login()" onclick="login()">登录</button>
+    <button class="btn-primary" id="loginBtn" type="button" onclick="login()">登录</button>
     <div class="divider">输入昵称+密码，数据自动同步</div>
     <button class="btn-ghost" onclick="skipLogin()">先看看 🌟</button>
   </div>
@@ -171,7 +173,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <div class="container" id="mainContent" style="display:none">
   <div class="stats-row" id="statsRow"></div>
   <div class="glass weekly-progress">
-    <h3>本周进度 <span id="weekProgressText">0/5 天</span></h3>
+    <h3>本周进度 <span id="weekProgressText">0/6 天</span></h3>
     <div class="pbar"><div class="pfill" id="weeklyBar" style="width:0%"></div></div>
   </div>
   <div class="glass">
@@ -399,13 +401,13 @@ function render() {
   
 
   var weekDone = 0;
-  for (var i = 1; i <= 5; i++) { var wd = new Date(now); wd.setDate(now.getDate() - now.getDay() + i); var wk = wd.getFullYear() + "-" + (wd.getMonth() + 1) + "-" + wd.getDate(); if (data[wk]) weekDone++; }
-  document.getElementById("weeklyBar").style.width = Math.round(weekDone / 5 * 100) + "%";
-  document.getElementById("weekProgressText").innerText = weekDone + "/5 天";
+  for (var i = 1; i <= 6; i++) { var wd = new Date(now); wd.setDate(now.getDate() - now.getDay() + i); var wk = wd.getFullYear() + "-" + (wd.getMonth() + 1) + "-" + wd.getDate(); if (data[wk]) weekDone++; }
+  document.getElementById("weeklyBar").style.width = Math.round(weekDone / 6 * 100) + "%";
+  document.getElementById("weekProgressText").innerText = weekDone + "/6 天";
 
-  var plan = getPlan(selDay), list = document.getElementById("exerciseList"), title = document.getElementById("planTitle"), dur = document.getElementById("planDur"), note = document.getElementById("planNote"), ptype = document.getElementById("planType"), pheader = document.getElementById("planHeader"), btn = document.getElementById("checkinBtn");
+  var plan = getPlan(selDay === 0 ? 7 : selDay), list = document.getElementById("exerciseList"), title = document.getElementById("planTitle"), dur = document.getElementById("planDur"), note = document.getElementById("planNote"), ptype = document.getElementById("planType"), pheader = document.getElementById("planHeader"), btn = document.getElementById("checkinBtn");
 
-  if (!plan || selDay === 0 || selDay === 6) {
+  if (!plan) {
     pheader.className = "plan-header rest-bg"; ptype.className = "card-type";
     ptype.innerText = "休息日"; title.innerText = ""; dur.innerText = "";
     note.innerText = "好好休息，恢复体能";
@@ -425,7 +427,7 @@ function render() {
   var tk2 = td.getFullYear() + "-" + (td.getMonth() + 1) + "-" + td.getDate();
   var checked = !!data[tk2];
 
-  if (checked) { list.innerHTML = plan.e.map(function(ex, i) { return "<div class=\"exercise done\"><div class=\"check-circle\">✅</div><div class=\"ex-info\"><div class=\"ex-name\">" + ex[0] + "</div><div class=\"ex-detail\">" + ex[1] + "</div></div></div>"; }).join(""); btn.style.display = "none"; return; }
+  if (checked) { list.innerHTML = plan.e.map(function(ex, i) { return "<div class=\"exercise done\"><div class=\"check-circle\">✅</div><div class=\"ex-info\"><div class=\"ex-name\">" + ex[0] + "</div><div class=\"ex-detail\">" + ex[1] + "</div></div></div>"; }).join(""); btn.style.display = "block"; btn.innerText = "✅ 取消打卡"; btn.className = "checkin-btn cancel"; return; }
   list.innerHTML = plan.e.map(function(ex, i) { return "<div class=\"exercise\" data-idx=\"" + i + "\" data-name=\"" + ex[0] + "\" data-detail=\"" + ex[1] + "\"><div class=\"check-circle\" id=\"chk" + i + "\"></div><div class=\"ex-info\"><div class=\"ex-name\">" + ex[0] + "</div><div class=\"ex-detail\">" + ex[1] + "</div></div><div class=\"ex-num\">" + (i + 1) + "</div></div>"; }).join("");
   btn.style.display = "block"; btn.className = "checkin-btn"; btn.innerText = "完成今日打卡";
 }
@@ -445,8 +447,11 @@ function showEmoji(extra) {
 }
 
 async function doCheckin() {
-  var now = new Date(), key = todayKey(), data = getData();
-  data[key] = {date: key, day: now.getDay(), at: new Date().toISOString()};
+  var now = new Date(), data = getData();
+  var d = new Date(now);
+  d.setDate(now.getDate() - now.getDay() + selDay);
+  var key = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+  data[key] = {date: key, day: selDay, at: new Date().toISOString()};
   saveData(data);
   if (_currentUser) saveCloudData(data);
   showEmoji();
@@ -469,23 +474,11 @@ window.onload = function() {
   if (saved) {
     try { _currentUser = JSON.parse(saved); } catch(e) {}
   }
-  // Auto test login
-  setTimeout(function() {
-    document.getElementById("loginEmail").value = "testuser";
-    document.getElementById("loginPassword").value = "123456";
-    try {
-      login();
-      document.title = "SUCCESS";
-    } catch(e) {
-      document.title = "ERR:" + e.message.substring(0,50);
-      alert("Login error: " + e.message);
-    }
-  }, 1000);
 };
 
 
 
-var PLANS = {"边后卫":{"1":{"t":"周一 · 上半身力量","d":"60min","n":"边后卫需要上肢对抗能力，重点发展推力和拉力的平衡。","e":[["弹力带肩关节激活","热身 5min"],["杠铃卧推","4x8-12"],["引体向上","4x8-12"],["哑铃坐姿推举","3x10-12"],["杠铃划船","4x10-12"],["农夫行走","3x30m"],["二头弯举+三头下压","3x10+12"],["平板支撑+侧支撑","3x45s+30s"],["拉伸放松","冷身 5min"]]},"2":{"t":"周二 · 下半身力量","d":"60min","n":"边后卫需要爆发力和耐力，单腿力量是关键。","e":[["动态拉伸+空蹲跳","热身 5min"],["杠铃深蹲","4x8-10"],["保加利亚分腿蹲","3x10/腿"],["罗马尼亚硬拉","4x10-12"],["负重臀推","3x12-15"],["单腿提踏","3x15/腿"],["站姿提踵","4x15-20"],["反向卷腹","3x15"],["静态拉伸","冷身 5min"]]},"3":{"t":"周三 · 足球专项训练","d":"60-90min","n":"边路传中是核心武器。","e":[["慢跑+动态拉伸+颠球","热身"],["折返跑 5-10-15m","4组"],["Z字变向+急停","4组"],["静止球传中","各 15次"],["带球下底传中","各 10次"],["1v1攻防+滑步","10回合"],["反复冲刺跑","5组"],["静态拉伸","冷身"]]},"4":{"t":"周四 · 上半身力量","d":"60min","n":"加强肩背力量，提升对抗时的卡位能力。","e":[["弹力带肩关节环绕","热身 5min"],["负重俯卧撑","4x10-15"],["哑铃划船","4x10-12"],["哑铃推举","3x10-12"],["引体向上","4x8-12"],["面拉","3x15"],["波比跳","3x10"],["上肢拉伸","冷身 5min"]]},"5":{"t":"周五 · 下半身力量","d":"60min","n":"冲刺和变向能力依赖下肢爆发力。","e":[["慢跑+高抬腿+开合跳","热身 5min"],["杠铃深蹲","5x8-10"],["箭步蹲行走","3x12/腿"],["硬拉","4x8-10"],["跳箱训练","3x6"],["侧向弓步","3x10/侧"],["核心稳定性训练","3组"],["静态拉伸","冷身 5min"]]}},"中后卫":{"1":{"t":"周一 · 上半身力量","d":"60min","n":"中后卫需要上身力量争顶和对抗，重点发展推力。","e":[["肩关节环绕+弹力带激活","热身 5min"],["杠铃卧推","5x8-12"],["引体向上","4x8-12"],["哑铃推举","4x10-12"],["杠铃划船","4x10-12"],["高竹筐推举","3x10"],["平板支撑+侧支撑","3x60s+40s"],["拉伸放松","冷身 5min"]]},"2":{"t":"周二 · 下半身力量","d":"60min","n":"弹跳和对抗是中后卫核心，深蹲硬拉是基础。","e":[["动态拉伸+跳箱","热身 5min"],["杠铃深蹲","5x8-10"],["罗马尼亚硬拉","4x10-12"],["保加利亚分腿蹲","3x10/腿"],["负重臀推","3x12-15"],["站姿提踵","4x15-20"],["反向卷腹","3x15"],["静态拉伸","冷身 5min"]]},"3":{"t":"周三 · 足球专项训练","d":"60-90min","n":"头球解围和回追是中后卫核心。","e":[["慢跑+动态拉伸","热身 5min"],["头球争顶","各 20次"],["回追冲刺30m","6组"],["1v1防守+卡位","10回合"],["长传解围+出球","各 15次"],["折返跑+滑步","4组"],["小场地防守对抗","20min"],["静态拉伸","冷身"]]},"4":{"t":"周四 · 上半身力量","d":"60min","n":"强化上肢力量和核心稳定性。","e":[["弹力带肩关节激活","热身 5min"],["负重俯卧撑","4x10-15"],["哑铃划船","4x10-12"],["哑铃推举","3x10-12"],["引体向上","4x8-12"],["药球过顶砸地","3x10"],["农夫行走","3x30m"],["上肢拉伸","冷身 5min"]]},"5":{"t":"周五 · 下半身力量","d":"60min","n":"爆发力和耐力决定中后卫的防守覆盖范围。","e":[["慢跑+空蹲跳","热身 5min"],["杠铃深蹲","5x8-10"],["硬拉","4x8-10"],["跳箱训练","4x6"],["负重箭步蹲","3x10/腿"],["核心抗旋转训练","3组"],["30m冲刺跑","6组"],["静态拉伸","冷身 5min"]]}},"中场":{"1":{"t":"周一 · 力量（下肢+核心）","d":"70min","n":"下肢爆发力+核心稳定是中场基础。","e":[["动感单车","热身 10min"],["泡沫轴激活下肢","热身 10min"],["弹震式深蹲（慢下快上）","5×5 40kg"],["杠铃后撤步加抬腿（核心收紧抬腿要快）","3×6 40kg"],["哑铃单腿罗马尼亚硬拉（核心收紧）","3×8 15-20kg"],["哑铃单边推举加侧弓步","3×8 10-15kg"],["瑜伽球臀桥（锻炼后群）","3×10"],["哥本哈根支撑（内收肌训练）","3×20-30s"],["动态侧平板","3×10 2.5kg"]]},"2":{"t":"周二 · 高强度有球（控球10min+HIIT+传控）","d":"75min","n":"带球慢跑5分钟+颠球30次热身，控球训练10分钟（V字推拉3min+内外侧交替触球3min+踩球转身4min），不喧宾夺主。","e":[["带球慢跑","热身 5min"],["颠球","热身 30次"],["脚底V字推拉（左右脚交替）","控球 3min"],["脚内侧+外侧快速交替触球（原地高频）","控球 3min"],["原地踩球+突然拉球转身（左右交替）","控球 4min"],["25米带球冲刺→急停转身→慢跑回（触球≥3次）","12组 组间休息45s"],["对墙单触回传（每20次插入30s踩球）","左右脚各80次"],["接反弹球停向一侧传出","左右各50次"],["全身拉伸放松","冷身 10min"]]},"3":{"t":"周三 · 力量（功能性训练）","d":"70min","n":"核心抗旋转和单侧力量，提升场上对抗稳定性。","e":[["泡沫轴","热身 10min"],["核心激活","热身"],["杠铃片摇摆（双手各15kg）","4×8 30kg总重"],["弓步交替抗旋","4×12 10-15kg"],["单腿杠铃环绕（每侧）","4×8/侧 10-15kg"],["绳索上劈（龙门架）","3×12 自选"],["绳索下劈（同上）","3×12 自选"],["单支撑哑铃卧推","3×8 15-17.5kg"],["单腿俯身划船（对侧手拿哑铃）","3×8 15-20kg"]]},"4":{"t":"周四 · 力量（下肢爆发）+ 轻量有球","d":"80min","n":"单车热身10min，下肢爆发力为主，力量后休息5分钟执行轻量有球。","e":[["单车","热身 10min"],["单腿臀桥（爆发）","4×10 20-25kg杠铃片"],["地雷杆侧弓步（不算杆重）","3×8 40kg片"],["火箭推（双手）","3×10 20kg片"],["地雷杆单腿蹲","4×8 10-15kg"],["深蹲跳（半蹲起跳蹬地要快）","3×5 20-30kg"],["哑铃分腿蹲","3×8 10-15kg"],["后腿抬高跳（膝盖碰胸）","4×10 自重"],["后腿抬高左右跳","3×10 自重"],["休息5分钟"],["颠球（脚/大腿/头交替）","5min"],["原地控球（V字推拉+踩球转身各2.5min）","5min"]]},"5":{"t":"周五 · 主动恢复（轻量有球+控球激活）","d":"50min","n":"低强度技术日，保持球感不增加疲劳。","e":[["脚底横向拉球（左右脚交替）","控球 3min"],["脚内侧扣球变向（原地）","控球 3min"],["慢速带球+急停踩球（10米往返）","控球 4min"],["颠球（目标连续100次不落地）","10min"],["对墙轻量传接","15min"],["泡沫轴全身放松","15min"]]},"6":{"t":"周六 · 实战比赛+赛后加练","d":"120min","n":"比赛中刻意执行：抬头观察、跑动接应在传球线路上、尝试至少3次长传转移。赛后加练射门和长传。","e":[["正式/业余比赛","90min"],["休息","10min"],["正脚背抽射","10次"],["内脚背弧线","10次"],["外脚背射门","10次"],["凌空射门","10次"],["长传转移（左右脚各15次目标30m外）","30次"],["冷身+冰敷","15min"]]},"7":{"t":"周日 · 完全休息","d":"—","n":"不做任何训练，保证8-9小时睡眠。","e":[["充分睡眠","8-9小时"],["营养补充","高蛋白饮食"],["泡沫轴轻量放松（可选）","10min"]]}},"前锋":{"1":{"t":"周一 · 上半身力量","d":"60min","n":"前锋需要背身拿球能力，上肢力量决定护球效果。","e":[["肩关节激活+弹力带","热身 5min"],["杠铃卧推","5x8-12"],["引体向上","4x8-12"],["哑铃推举","3x10-12"],["杠铃划船","4x10-12"],["哑铃侧平举","3x12-15"],["平板支撑+俄罗斯转体","3x45s+30s"],["拉伸放松","冷身 5min"]]},"2":{"t":"周二 · 下半身力量","d":"60min","n":"爆发力决定前锋上限，深蹲和跳箱是核心。","e":[["动态拉伸+纵跳","热身 5min"],["杠铃深蹲","5x8-10"],["保加利亚分腿蹲","3x10/腿"],["罗马尼亚硬拉","4x10-12"],["跳箱训练","4x6"],["负重臀推","3x12-15"],["站姿提踵","4x15-20"],["30m冲刺跑","6组"],["静态拉伸","冷身 5min"]]},"3":{"t":"周三 · 足球专项训练","d":"60-90min","n":"前锋核心是射门和跑位。","e":[["动态拉伸+加速跑","热身"],["禁区前射门","各 15次"],["跑动中接球射门","各 12次"],["单刀球处理","10次"],["头球攻门","20次"],["反越位前插跑位","各 10次"],["小场地对抗赛","20min"],["静态拉伸","冷身"]]},"4":{"t":"周四 · 上半身力量","d":"60min","n":"前锋需要力量对抗中卫。","e":[["弹力带肩关节激活","热身 5min"],["负重俯卧撑","4x10-15"],["哑铃划船","4x10-12"],["哑铃推举","3x10-12"],["引体向上","4x8-12"],["背身护球模拟","3组"],["波比跳","3x10"],["上肢拉伸","冷身 5min"]]},"5":{"t":"周五 · 下半身力量","d":"60min","n":"加速能力和变向是前锋突破的关键。","e":[["慢跑+动态拉伸+冲刺","热身"],["杠铃深蹲","5x8-10"],["硬拉","4x8-10"],["负重箭步蹲","3x10/腿"],["跳箱训练","4x6"],["核心抗旋转训练","3组"],["立定跳远","5次"],["静态拉伸","冷身"]]}},"守门员":{"1":{"t":"周一 · 上半身力量","d":"60min","n":"守门员上肢力量决定扑救范围。","e":[["手腕脚踝激活","热身 5min"],["杠铃卧推","5x8-12"],["引体向上","4x8-12"],["哑铃推举","4x10-12"],["杠铃划船","4x10-12"],["药球过顶砸地","3x12"],["三头下压+二头弯举","3x10+12"],["平板支撑","3x60s"],["拉伸放松","冷身 5min"]]},"2":{"t":"周二 · 下半身力量","d":"60min","n":"守门员弹跳和爆发力决定扑救上限。","e":[["蹦跳+踝关节激活","热身 5min"],["杠铃深蹲","5x8-10"],["深蹲跳","4x10"],["跳箱训练","4x8"],["罗马尼亚硬拉","4x10-12"],["坐姿腿弯举","3x12-15"],["站姿提踵","4x15-20"],["立定跳远","5次"],["静态拉伸","冷身 5min"]]},"3":{"t":"周三 · 足球专项训练","d":"60-90min","n":"反应和出击时机是门将生命线。","e":[["横向滑步+手腕激活","热身"],["接地滚球+分边","各 20次"],["左右侧扑","各 15次"],["单刀球出击","15次"],["角球出击接高球","10次"],["大脚开球+手抛球","各 15次"],["短距离冲刺+横移","5组"],["静态拉伸","冷身"]]},"4":{"t":"周四 · 上半身力量","d":"60min","n":"守门员需要强大的上肢爆发力。","e":[["肩关节环绕+弹力带","热身"],["负重俯卧撑","4x10-15"],["哑铃划船","4x10-12"],["哑铃推举","3x10-12"],["引体向上","4x8-12"],["药球胸前推","3x10"],["面拉","3x15"],["上肢拉伸","冷身 5min"]]},"5":{"t":"周五 · 下半身力量","d":"60min","n":"门将的横向移动和弹跳依赖下肢爆发力。","e":[["慢跑+横向滑步+蹦跳","热身"],["杠铃深蹲","5x8-10"],["深蹲跳","4x10"],["跳箱训练","4x8"],["硬拉","4x8-10"],["侧向弓步","3x10/侧"],["核心抗旋转训练","3组"],["静态拉伸","冷身"]]}}};
+var PLANS = {"边后卫":{"1":{"t":"周一 · 上半身力量","d":"60min","n":"边后卫需要上肢对抗能力，重点发展推力和拉力的平衡。","e":[["弹力带肩关节激活","热身 5min"],["杠铃卧推","4x8-12"],["引体向上","4x8-12"],["哑铃坐姿推举","3x10-12"],["杠铃划船","4x10-12"],["农夫行走","3x30m"],["二头弯举+三头下压","3x10+12"],["平板支撑+侧支撑","3x45s+30s"],["拉伸放松","冷身 5min"]]},"2":{"t":"周二 · 下半身力量","d":"60min","n":"边后卫需要爆发力和耐力，单腿力量是关键。","e":[["动态拉伸+空蹲跳","热身 5min"],["杠铃深蹲","4x8-10"],["保加利亚分腿蹲","3x10/腿"],["罗马尼亚硬拉","4x10-12"],["负重臀推","3x12-15"],["单腿提踏","3x15/腿"],["站姿提踵","4x15-20"],["反向卷腹","3x15"],["静态拉伸","冷身 5min"]]},"3":{"t":"周三 · 足球专项训练","d":"60-90min","n":"边路传中是核心武器。","e":[["慢跑+动态拉伸+颠球","热身"],["折返跑 5-10-15m","4组"],["Z字变向+急停","4组"],["静止球传中","各 15次"],["带球下底传中","各 10次"],["1v1攻防+滑步","10回合"],["反复冲刺跑","5组"],["静态拉伸","冷身"]]},"4":{"t":"周四 · 上半身力量","d":"60min","n":"加强肩背力量，提升对抗时的卡位能力。","e":[["弹力带肩关节环绕","热身 5min"],["负重俯卧撑","4x10-15"],["哑铃划船","4x10-12"],["哑铃推举","3x10-12"],["引体向上","4x8-12"],["面拉","3x15"],["波比跳","3x10"],["上肢拉伸","冷身 5min"]]},"5":{"t":"周五 · 下半身力量","d":"60min","n":"冲刺和变向能力依赖下肢爆发力。","e":[["慢跑+高抬腿+开合跳","热身 5min"],["杠铃深蹲","5x8-10"],["箭步蹲行走","3x12/腿"],["硬拉","4x8-10"],["跳箱训练","3x6"],["侧向弓步","3x10/侧"],["核心稳定性训练","3组"],["静态拉伸","冷身 5min"]]}},"中后卫":{"1":{"t":"周一 · 上半身力量","d":"60min","n":"中后卫需要上身力量争顶和对抗，重点发展推力。","e":[["肩关节环绕+弹力带激活","热身 5min"],["杠铃卧推","5x8-12"],["引体向上","4x8-12"],["哑铃推举","4x10-12"],["杠铃划船","4x10-12"],["高竹筐推举","3x10"],["平板支撑+侧支撑","3x60s+40s"],["拉伸放松","冷身 5min"]]},"2":{"t":"周二 · 下半身力量","d":"60min","n":"弹跳和对抗是中后卫核心，深蹲硬拉是基础。","e":[["动态拉伸+跳箱","热身 5min"],["杠铃深蹲","5x8-10"],["罗马尼亚硬拉","4x10-12"],["保加利亚分腿蹲","3x10/腿"],["负重臀推","3x12-15"],["站姿提踵","4x15-20"],["反向卷腹","3x15"],["静态拉伸","冷身 5min"]]},"3":{"t":"周三 · 足球专项训练","d":"60-90min","n":"头球解围和回追是中后卫核心。","e":[["慢跑+动态拉伸","热身 5min"],["头球争顶","各 20次"],["回追冲刺30m","6组"],["1v1防守+卡位","10回合"],["长传解围+出球","各 15次"],["折返跑+滑步","4组"],["小场地防守对抗","20min"],["静态拉伸","冷身"]]},"4":{"t":"周四 · 上半身力量","d":"60min","n":"强化上肢力量和核心稳定性。","e":[["弹力带肩关节激活","热身 5min"],["负重俯卧撑","4x10-15"],["哑铃划船","4x10-12"],["哑铃推举","3x10-12"],["引体向上","4x8-12"],["药球过顶砸地","3x10"],["农夫行走","3x30m"],["上肢拉伸","冷身 5min"]]},"5":{"t":"周五 · 下半身力量","d":"60min","n":"爆发力和耐力决定中后卫的防守覆盖范围。","e":[["慢跑+空蹲跳","热身 5min"],["杠铃深蹲","5x8-10"],["硬拉","4x8-10"],["跳箱训练","4x6"],["负重箭步蹲","3x10/腿"],["核心抗旋转训练","3组"],["30m冲刺跑","6组"],["静态拉伸","冷身 5min"]]}},"中场":{"1":{"t":"周一 · 力量（下肢+核心）","d":"70min","n":"下肢爆发力+核心稳定是中场基础。","e":[["动感单车","热身 10min"],["泡沫轴激活下肢","热身 10min"],["弹震式深蹲（慢下快上）","5×5 40kg"],["杠铃后撤步加抬腿（核心收紧，抬腿要快）","3×6 40kg"],["哑铃单腿罗马尼亚硬拉（核心收紧）","3×8 15-20kg"],["哑铃单边推举加侧弓步","3×8 10-15kg"],["瑜伽球臀桥（锻炼后群）","3×10"],["哥本哈根支撑（内收肌训练）","3×20-30s"],["动态侧平板","3×10 2.5kg"]]},"2":{"t":"周二 · 高强度有球（控球10min+HIIT+传控）","d":"75min","n":"带球慢跑5分钟+颠球30次热身，控球10分钟（V字推拉3min+内外侧交替触球3min+踩球转身4min），随后HIIT和疲劳下传控。","e":[["带球慢跑","热身 5min"],["颠球","热身 30次"],["脚底V字推拉（左右脚交替）","控球 3min"],["脚内侧+外侧快速交替触球（原地高频）","控球 3min"],["原地踩球+突然拉球转身（左右交替）","控球 4min"],["25米带球冲刺→急停转身→慢跑回起点（触球≥3次）","12组 组间休息45s"],["对墙单触回传（每20次插入30s踩球）","左右脚各80次"],["接反弹球停向一侧传出","左右各50次"],["全身拉伸放松","冷身 10min"]]},"3":{"t":"周三 · 力量（功能性训练）","d":"70min","n":"核心抗旋转和单侧力量，提升场上对抗稳定性。","e":[["泡沫轴","热身 10min"],["核心激活","热身"],["杠铃片摇摆（双手各15kg）","4×8 30kg总重"],["弓步交替抗旋","4×12 10-15kg"],["单腿杠铃环绕（每侧）","4×8/侧 10-15kg"],["绳索上劈（龙门架）","3×12 自选"],["绳索下劈（龙门架）","3×12 自选"],["单支撑哑铃卧推","3×8 15-17.5kg"],["单腿俯身划船（对侧手拿哑铃）","3×8 15-20kg"]]},"4":{"t":"周四 · 力量（下肢爆发）+ 轻量有球","d":"80min","n":"单车热身10min，下肢爆发力为主，力量后休息5分钟执行轻量有球。","e":[["单车","热身 10min"],["单腿臀桥（爆发）","4×10 20-25kg杠铃片"],["地雷杆侧弓步（不算杆重）","3×8 40kg片"],["火箭推（双手）","3×10 20kg片"],["地雷杆单腿蹲","4×8 10-15kg"],["深蹲跳（半蹲起跳蹬地要快）","3×5 20-30kg"],["哑铃分腿蹲","3×8 10-15kg"],["后腿抬高跳（膝盖碰胸）","4×10 自重"],["后腿抬高左右跳","3×10 自重"],["休息5分钟"],["颠球（脚/大腿/头交替）","5min"],["原地控球（V字推拉+踩球转身各2.5min）","5min"]]},"5":{"t":"周五 · 主动恢复（轻量有球+控球激活）","d":"50min","n":"低强度技术日，保持球感不增加疲劳。","e":[["脚底横向拉球（左右脚交替）","控球 3min"],["脚内侧扣球变向（原地）","控球 3min"],["慢速带球+急停踩球（10米往返）","控球 4min"],["颠球（目标连续100次不落地）","10min"],["对墙轻量传接","15min"],["泡沫轴全身放松","15min"]]},"6":{"t":"周六 · 实战比赛+赛后加练","d":"120min","n":"比赛中刻意执行：每次触球前抬头观察、跑动接应保持在传球线路上、尝试至少3次长传转移。赛后休息10分钟，加练射门（正脚背抽射/内脚背弧线/外脚背/凌空各10次）和长传（左右脚各15次目标30m外标志盘区域），冷身+冰敷15分钟。","e":[["正式/业余比赛","90min"],["休息","10min"],["正脚背抽射","10次"],["内脚背弧线","10次"],["外脚背射门","10次"],["凌空射门","10次"],["长传转移（左右脚各15次目标30m外标志盘区域）","30次"],["冷身+冰敷","15min"]]},"7":{"t":"周日 · 完全休息","d":"—","n":"不做任何训练，保证8-9小时睡眠。","e":[["充分睡眠","8-9小时"],["营养补充","高蛋白饮食"],["泡沫轴轻量放松（可选）","10min"]]}},"前锋":{"1":{"t":"周一 · 上半身力量","d":"60min","n":"前锋需要背身拿球能力，上肢力量决定护球效果。","e":[["肩关节激活+弹力带","热身 5min"],["杠铃卧推","5x8-12"],["引体向上","4x8-12"],["哑铃推举","3x10-12"],["杠铃划船","4x10-12"],["哑铃侧平举","3x12-15"],["平板支撑+俄罗斯转体","3x45s+30s"],["拉伸放松","冷身 5min"]]},"2":{"t":"周二 · 下半身力量","d":"60min","n":"爆发力决定前锋上限，深蹲和跳箱是核心。","e":[["动态拉伸+纵跳","热身 5min"],["杠铃深蹲","5x8-10"],["保加利亚分腿蹲","3x10/腿"],["罗马尼亚硬拉","4x10-12"],["跳箱训练","4x6"],["负重臀推","3x12-15"],["站姿提踵","4x15-20"],["30m冲刺跑","6组"],["静态拉伸","冷身 5min"]]},"3":{"t":"周三 · 足球专项训练","d":"60-90min","n":"前锋核心是射门和跑位。","e":[["动态拉伸+加速跑","热身"],["禁区前射门","各 15次"],["跑动中接球射门","各 12次"],["单刀球处理","10次"],["头球攻门","20次"],["反越位前插跑位","各 10次"],["小场地对抗赛","20min"],["静态拉伸","冷身"]]},"4":{"t":"周四 · 上半身力量","d":"60min","n":"前锋需要力量对抗中卫。","e":[["弹力带肩关节激活","热身 5min"],["负重俯卧撑","4x10-15"],["哑铃划船","4x10-12"],["哑铃推举","3x10-12"],["引体向上","4x8-12"],["背身护球模拟","3组"],["波比跳","3x10"],["上肢拉伸","冷身 5min"]]},"5":{"t":"周五 · 下半身力量","d":"60min","n":"加速能力和变向是前锋突破的关键。","e":[["慢跑+动态拉伸+冲刺","热身"],["杠铃深蹲","5x8-10"],["硬拉","4x8-10"],["负重箭步蹲","3x10/腿"],["跳箱训练","4x6"],["核心抗旋转训练","3组"],["立定跳远","5次"],["静态拉伸","冷身"]]}},"守门员":{"1":{"t":"周一 · 上半身力量","d":"60min","n":"守门员上肢力量决定扑救范围。","e":[["手腕脚踝激活","热身 5min"],["杠铃卧推","5x8-12"],["引体向上","4x8-12"],["哑铃推举","4x10-12"],["杠铃划船","4x10-12"],["药球过顶砸地","3x12"],["三头下压+二头弯举","3x10+12"],["平板支撑","3x60s"],["拉伸放松","冷身 5min"]]},"2":{"t":"周二 · 下半身力量","d":"60min","n":"守门员弹跳和爆发力决定扑救上限。","e":[["蹦跳+踝关节激活","热身 5min"],["杠铃深蹲","5x8-10"],["深蹲跳","4x10"],["跳箱训练","4x8"],["罗马尼亚硬拉","4x10-12"],["坐姿腿弯举","3x12-15"],["站姿提踵","4x15-20"],["立定跳远","5次"],["静态拉伸","冷身 5min"]]},"3":{"t":"周三 · 足球专项训练","d":"60-90min","n":"反应和出击时机是门将生命线。","e":[["横向滑步+手腕激活","热身"],["接地滚球+分边","各 20次"],["左右侧扑","各 15次"],["单刀球出击","15次"],["角球出击接高球","10次"],["大脚开球+手抛球","各 15次"],["短距离冲刺+横移","5组"],["静态拉伸","冷身"]]},"4":{"t":"周四 · 上半身力量","d":"60min","n":"守门员需要强大的上肢爆发力。","e":[["肩关节环绕+弹力带","热身"],["负重俯卧撑","4x10-15"],["哑铃划船","4x10-12"],["哑铃推举","3x10-12"],["引体向上","4x8-12"],["药球胸前推","3x10"],["面拉","3x15"],["上肢拉伸","冷身 5min"]]},"5":{"t":"周五 · 下半身力量","d":"60min","n":"门将的横向移动和弹跳依赖下肢爆发力。","e":[["慢跑+横向滑步+蹦跳","热身"],["杠铃深蹲","5x8-10"],["深蹲跳","4x10"],["跳箱训练","4x8"],["硬拉","4x8-10"],["侧向弓步","3x10/侧"],["核心抗旋转训练","3组"],["静态拉伸","冷身"]]}}};
 
 var TIPS = {"卧推":{s:["肩胛骨收紧贴凳","杠铃下放至胸中线","推起时呼气锁定"],m:["肩膀前送","杠铃落点太低"],t:"从空杠开始热身，递增重量。"},"深蹲":{s:["杠铃位置在斜方肌上","下蹲时膝盖对准脚尖","大腿平行地面"],m:["膝盖内扣","身体过度前倾"],t:"从50%重量热身，逐组递增。"},"硬拉":{s:["杠铃贴近小腿","背部挺直核心收紧","髋部发力前推"],m:["圆背拉起","杠铃远离身体"],t:"硬拉不做力竭组。"},"引体向上":{s:["正握肩宽","拉至下巴过杠","缓慢下放控制"],m:["身体晃动借力","下放太快"],t:"用弹力带辅助。"},"射门":{s:["支撑脚指向目标","脚背绷直摆腿","随球动作完整"],m:["身体后仰打高","支撑脚太远"],t:"先练定点，再练跑动中射门。"},"扑救":{s:["快速横移面对球","蹬地发力侧扑","手型呈W型"],m:["眼睛闭起来","手型松散"],t:"集中注意力预判。"}};
 
@@ -522,7 +515,7 @@ function importData(e){var f=e.target.files[0];if(!f)return;var r=new FileReader
 function selDayClick(d){selDay=d;render()}
 function selPos(p){curPosKey=p;localStorage.setItem("posKey",p);render()}
 function showEmoji(x){var l=x?[x].concat(EMOS):EMOS;for(var i=0;i<5;i++){var e=document.createElement("div");e.className="floating-emoji";e.innerText=l[Math.floor(Math.random()*l.length)];e.style.left=(10+Math.random()*80)+"vw";e.style.top=(20+Math.random()*40)+"vh";document.body.appendChild(e);setTimeout(function(){e.remove()},1500)}}
-async function doCheckin(){var n=new Date(),k=todayKey(),d=getData();d[k]={date:k,day:n.getDay(),at:new Date().toISOString()};saveData(d);if(_currentUser)saveCloudData(d);showEmoji();render()}
+async function doCheckin(){var n=new Date(),d=getData();var w=new Date(n);w.setDate(n.getDate()-n.getDay()+selDay);var k=w.getFullYear()+'-'+(w.getMonth()+1)+'-'+w.getDate();if(d[k]){if(!confirm('\u786E\u5B9A\u53D6\u6D88\u6253\u5361\uFF1F'))return;delete d[k];saveData(d);if(_currentUser)saveCloudData(d);render();return}d[k]={date:k,day:selDay,at:new Date().toISOString()};saveData(d);if(_currentUser)saveCloudData(d);showEmoji();render()}
 document.getElementById("posBar").addEventListener("click",function(e){var b=e.target.closest(".pos-btn");if(b&&b.dataset.pos){selPos(b.dataset.pos)}})
 document.getElementById("exerciseList").addEventListener("click",function(e){var i=e.target.closest(".exercise");if(!i||i.classList.contains("done"))return;var n=i.getAttribute("data-name")||"",t=getTip(n),o=document.getElementById("tutOverlay");document.getElementById("tutTitle").innerText=n;if(t){document.getElementById("tutSteps").innerHTML=t.s.map(function(s){return"<li>"+s+"</li>"}).join("");document.getElementById("tutMistakes").innerHTML=t.m.map(function(m){return"<li>"+m+"</li>"}).join("");document.getElementById("tutTips").innerText=t.t}else{document.getElementById("tutSteps").innerHTML="<li>保持正确姿势</li>";document.getElementById("tutMistakes").innerHTML="<li>不要借用惯性</li>";document.getElementById("tutTips").innerText="质量优先于数量。"}_clickedEx=i;o.classList.add("show")})
 function markDone(){if(_clickedEx){_clickedEx.classList.add("done");var c=_clickedEx.querySelector(".check-circle");if(c)c.innerText="✓";showEmoji("✅")}closeTut()}
@@ -802,6 +795,15 @@ function renderFields() {
   document.getElementById('locText').textContent = '📍 等待定位...';
 }
 
+
+function showMockFields() {
+  var m = [{t:"成都足球公园",a:"成华区双林路1号",d:"约1.2km",lat:30.66,lng:104.10},{t:"东郊足球场",a:"成华区建设南路",d:"约2.5km",lat:30.65,lng:104.11},{t:"成都市体育中心",a:"青羊区人民中路",d:"约5km",lat:30.66,lng:104.07}];
+  var h = "";
+  for(var i=0;i<m.length;i++){
+    h += '<div class="field-card"><div class="field-top"><span class="field-name">'+m[i].t+'</span><span class="field-dist">'+m[i].d+'</span></div><span class="field-addr">'+m[i].a+'</span><div class="field-tags"><span class="field-tag">⚽ 足球场</span></div><div class="field-bottom"><button class="field-btn field-btn-nav" onclick="window.open(\'https://apis.map.qq.com/uri/v1/marker?marker=coord:'+m[i].lat+','+m[i].lng+'&title='+m[i].t+'\')">🗺️ 导航</button></div></div>';
+  }
+  document.getElementById("fieldList").innerHTML = h;
+}
 function searchNearby() {
   document.getElementById('fieldList').innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3)">⏳ 正在定位...</div>';
   
@@ -821,16 +823,6 @@ function searchNearby() {
   }
 }
 
-
-
-function showMockFields() {
-  var m = [{t:"成都足球公园",a:"成华区双林路1号",d:"约1.2km",lat:30.66,lng:104.10},{t:"东郊足球场",a:"成华区建设南路",d:"约2.5km",lat:30.65,lng:104.11},{t:"成都市体育中心",a:"青羊区人民中路",d:"约5km",lat:30.66,lng:104.07}];
-  var h = "";
-  for(var i=0;i<m.length;i++){
-    h += '<div class="field-card"><div class="field-top"><span class="field-name">'+m[i].t+'</span><span class="field-dist">'+m[i].d+'</span></div><span class="field-addr">'+m[i].a+'</span><div class="field-tags"><span class="field-tag">⚽ 足球场</span></div><div class="field-bottom"><button class="field-btn field-btn-nav" onclick="window.open(\'https://apis.map.qq.com/uri/v1/marker?marker=coord:'+m[i].lat+','+m[i].lng+'&title='+m[i].t+'\')">🗺️ 导航</button></div></div>';
-  }
-  document.getElementById("fieldList").innerHTML = h;
-}
 function ipLocate() {
   document.getElementById('locText').textContent = '📍 正在通过IP定位...';
   // 用腾讯地图 IP 定位
