@@ -728,6 +728,12 @@ function switchTab(tab) {
 
 // ===== 动作库数据 =====
 var EX_DATA = [
+  {ico:"🇧🇷",name:"C罗式射门",desc:"C罗标志性射门：电梯球、暴力远射、头槌",cat:"射门",diff:"★★★★★",detail:"C罗标志性动作：助跑节奏独特，支撑脚站稳，身体前倾，正脚背全力抽射球中下部产生「电梯球」效果，球路诡异下坠。头球时弹跳惊人，腰腹发力在空中停留，前额顶向球门死角",gif:"https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExemU4cDJoNDRnYXlwMXFyYWQ3anJxN2c1dHhlbnh4amwxdHpyMXR1eCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/4txOiFafZPuJnADh15/giphy.gif"},
+  {ico:"🦶",name:"荡球外拨",desc:"左右脚交替荡球+向外拨球",cat:"盘带",diff:"★☆☆",detail:"双脚交替用脚内侧将球横向荡过身体，随即用脚外侧向外拨出。保持低重心，触球部位要准确，节奏均匀",video:"images/dribbling_basics.mp4",vs:4,ve:13},
+  {ico:"↔️",name:"内控外拨",desc:"脚内侧控球+外侧拨球变向",cat:"盘带",diff:"★☆☆",detail:"用脚内侧将球扣住，随即切换脚外侧向外拨出完成变向。动作要连贯，重心跟随球移动，左右交替练习",video:"images/dribbling_basics.mp4",vs:14,ve:22},
+  {ico:"⏪",name:"踩拉球训练",desc:"脚底踩停+向后拉球组合",cat:"盘带",diff:"★☆☆",detail:"用脚底踩停球后迅速向后拉，再用同一只脚向前推出。保持抬头观察，感受脚底触球部位的变化",video:"images/dribbling_basics.mp4",vs:23,ve:32},
+  {ico:"🔄",name:"V字拉球",desc:"经典V字变向控球",cat:"盘带",diff:"★☆☆",detail:"脚底将球向后拉，脚内侧向前推，形成V字轨迹。左右脚交替，注意拉球幅度和推球方向的控制",video:"images/dribbling_basics.mp4",vs:32,ve:42},
+  {ico:"🔁",name:"后V字拉球",desc:"向后V字变向训练",cat:"盘带",diff:"★★☆",detail:"将球向后拉至身后，用脚内侧从另一侧推出。需要更好的身体协调性和空间感知，注意转身时的重心转移",video:"images/dribbling_basics.mp4",vs:43,ve:55},
   {ico:"⚡",name:"正脚背抽射",desc:"远距离大力射门",cat:"射门",diff:"★★☆",detail:"支撑脚指向目标方向，脚背绷直，膝盖对准球，摆腿发力击球中部，随球动作完整跟进"},
   {ico:"🌀",name:"内脚背弧线球",desc:"绕过防守队员的弧线射门",cat:"射门",diff:"★★★",detail:"支撑脚指向目标偏左，用脚内侧击球底部偏右，随球动作向右上方摆动，球会产生弧线绕过防守"},
   {ico:"💥",name:"外脚背弹射",desc:"出其不意的快速射门",cat:"射门",diff:"★★★",detail:"支撑脚站稳，脚踝锁定用外脚背击球，发力短促干脆，球路会产生外旋"},
@@ -736,7 +742,6 @@ var EX_DATA = [
   {ico:"↗️",name:"外脚背传球",desc:"快速出球适合边路转移",cat:"传球",diff:"★★☆",detail:"支撑脚站稳，脚踝内扣用外脚背触球，发力短促，球速快线路平直"},
   {ico:"📡",name:"长传转移",desc:"改变进攻方向的关键技术",cat:"传球",diff:"★★★",detail:"支撑脚站位稍远，用脚内侧大力击球底部，随球动作高而长，球产生高弧度远距离飞行"},
   {ico:"🎯",name:"直塞球",desc:"穿透防线送出身后球",cat:"传球",diff:"★★★",detail:"观察队友跑位时机，脚内侧推击球中下部，力度控制要精准，球速快穿越防线"},
-  {ico:"🔄",name:"V字推拉",desc:"原地控球基础动作",cat:"盘带",diff:"★☆☆",detail:"用脚底将球向后拉，迅速用同一只脚向前推，左右脚交替进行，保持低重心和节奏"},
   {ico:"🚲",name:"踩单车",desc:"晃开防守队员重心",cat:"盘带",diff:"★★★",detail:"身体重心下沉，一只脚从球上方绕过，迅速换另一只脚绕过，向反方向加速突破"},
   {ico:"💫",name:"马赛回旋",desc:"优雅的转身过人",cat:"盘带",diff:"★★★★",detail:"用一只脚踩球向后拉，身体同时旋转180度，另一只脚接球向前，动作要连贯流畅"},
   {ico:"🐂",name:"牛尾巴过人",desc:"快速变向突破",cat:"盘带",diff:"★★★★",detail:"用脚外侧向一侧拨球，迅速切换脚内侧扣向另一侧，身体重心随之快速变向，加速摆脱防守"},
@@ -794,15 +799,43 @@ function showExDetail(idx) {
   document.getElementById('modalDesc').textContent = item.desc;
   document.getElementById('modalTags').innerHTML = '<span class="modal-tag">🏷️ ' + item.cat + '</span><span class="modal-tag">📊 ' + item.diff + '</span>';
   var steps = item.detail.split('，');
-  var stepsHtml = '<span class="modal-steps-title">📝 步骤要领</span>';
+  var stepsHtml = '';
+  if (item.gif) {
+    stepsHtml += '<div style="margin:12px 0;border-radius:12px;overflow:hidden"><img src="' + item.gif + '" style="width:100%;display:block;border-radius:12px" alt="演示"></div>';
+  }
+  if (item.video) {
+    stepsHtml += '<div style="margin:12px 0;border-radius:12px;overflow:hidden;position:relative"><video class="demo-clip" src="' + item.video + '" style="width:100%;display:block;border-radius:12px" muted playsinline data-st="' + (item.vs||0) + '" data-et="' + (item.ve||999) + '"></video><div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.6);color:#fff;font-size:11px;padding:2px 8px;border-radius:10px">▶ 教学</div></div>';
+  }
+  stepsHtml += '<span class="modal-steps-title">📝 步骤要领</span>';
   for (var i = 0; i < steps.length; i++) {
     stepsHtml += '<span class="modal-step">' + (i+1) + '. ' + steps[i].trim() + '</span>';
   }
   document.getElementById('modalSteps').innerHTML = stepsHtml;
   document.getElementById('exModal').classList.add('show');
+  // Init video after modal shows
+  if (item.video) {
+    var iv = setInterval(function(){
+      var v = document.querySelector('#exModal.show .demo-clip');
+      if (v && v.readyState >= 2) {
+        clearInterval(iv);
+        v.currentTime = parseFloat(v.dataset.st);
+        v._clipTimer = setInterval(function() {
+          var clip = document.querySelector("#exModal.show .demo-clip");
+          if (!clip) { return; }
+          var et = parseFloat(clip.dataset.et || 999);
+          if (clip.currentTime >= et) {
+            clip.currentTime = parseFloat(clip.dataset.st || 0);
+          }
+        }, 50);
+        v.play();
+      } else if (!document.querySelector('#exModal.show')) {
+        clearInterval(iv);
+      }
+    }, 100);
+  }
 }
 
-function closeExModal() { document.getElementById('exModal').classList.remove('show'); }
+function closeExModal() { document.getElementById('exModal').classList.remove('show'); var clip = document.querySelector('.demo-clip'); if (clip) { clip.pause(); if (clip._clipTimer) clearInterval(clip._clipTimer); } }
 
 // ===== 球场 - 腾讯地图 API =====
 var map = null;
